@@ -15,6 +15,7 @@ project "ScalEngine"
     
     defines
     {
+        --"SCAL_BUILD_DLL"
     }
 
     includedirs
@@ -26,13 +27,25 @@ project "ScalEngine"
     {
     }
 
-    filter { "configurations:Debug" }
+    filter "configurations:Debug"
         defines "SCAL_DEBUG"
         buildoptions "/MTd"
         runtime "Debug"
         symbols "on"
 
-    filter { "configurations:Release" }
+    filter "configurations:Release"
         buildoptions "/MT"
         runtime "Release"
         optimize "on"
+
+    filter "system:Windows"
+        defines "SCAL_PLATFORM_WINDOWS"
+        systemversion "latest"
+
+    --filter "system:Unix"
+        --defines "SCAL_PLATFORM_LINUX"
+
+    postbuildcommands
+    {
+        --("{COPY} %{cfg.buildtarget.relpath} ../bin/ .. outputdir .. /Sandbox")
+    }
