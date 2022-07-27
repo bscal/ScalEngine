@@ -1,5 +1,5 @@
-project "ScalEngine"
-    kind "SharedLib"
+project "ScalGame"
+    kind "ConsoleApp"
     language "C++"
     staticruntime "off"
     cppdialect "C++20"
@@ -15,16 +15,18 @@ project "ScalEngine"
     
     defines
     {
-        "SCAL_BUILD_DLL"
     }
 
     includedirs
     {
-        "src"
+        "src",
+        "%{wks.location}/ScalEngine/src",
+        "%{wks.location}/ScalEngine/vendor"
     }
 
     links
     {
+        "ScalEngine"
     }
 
     filter "configurations:Debug"
@@ -34,7 +36,6 @@ project "ScalEngine"
         symbols "on"
 
     filter "configurations:Release"
-        defines "SCAL_RELEASE"
         buildoptions "/MD"
         runtime "Release"
         optimize "on"
@@ -48,5 +49,5 @@ project "ScalEngine"
 
     postbuildcommands
     {
-        ("{COPYDIR} %{wks.location}/bin/" .. outputdir .. "/%{prj.name}\\ScalEngine.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}\\../ScalGame/")
+        --("{COPY} %{cfg.buildtarget.relpath} ../bin/ .. outputdir .. /Sandbox")
     }

@@ -7,11 +7,12 @@ workspace "ScalEngine"
         "Release"
     }
 
-    startproject "ScalEngine"
+    startproject "ScalGame"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "ScalEngine"
+include "ScalGame"
 
 newaction
 {
