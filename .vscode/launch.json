@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "configurations": [
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug-windows-x86_64/ScalGame/ScalGame.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/Debug-windows-x86_64/ScalGame",
+            "environment": [],
+            "console":"newExternalWindow",
+        },
+        {
+            "name": "(Linux) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug-windows-x86_64/ScalGame/ScalGame",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/Debug-windows-x86_64/ScalGame",
+            "environment": [],
+        }
+    ]
+} 
