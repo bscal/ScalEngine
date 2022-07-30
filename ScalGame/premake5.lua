@@ -10,7 +10,7 @@ project "ScalGame"
     files
     {
         "src/**.cpp",
-        "src/*.h"
+        "src/**.h"
     }
     
     defines

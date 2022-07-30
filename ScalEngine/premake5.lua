@@ -10,7 +10,7 @@ project "ScalEngine"
     files
     {
         "src/**.cpp",
-        "src/*.h"
+        "src/**.h"
     }
     
     defines

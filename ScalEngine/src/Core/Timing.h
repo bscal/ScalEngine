@@ -9,10 +9,20 @@ namespace Scal
 	{
 		LARGE_INTEGER Frequency;
 		LARGE_INTEGER StartCounter;
-		LARGE_INTEGER EndCounter;
-		int64_t StartCycleCount;
+		uint64_t StartCycleCount;
 
 		SCAL_API Timer();
 		SCAL_API ~Timer();
 	};
+
+	struct PersistentTimer
+	{
+		LARGE_INTEGER Frequency;
+		LARGE_INTEGER LastCounter;
+		uint64_t LastCycleCount;
+
+		SCAL_API PersistentTimer();
+		SCAL_API void Stop();
+	};
+
 }
