@@ -2,8 +2,12 @@
 
 #ifdef SCAL_PLATFORM_WINDOWS
 
+#include "Core/Core.h"
+#include "Core/Logger.h"
+
 #include <Windows.h>
 #include <windowsx.h>
+#include <stdlib.h>
 
 struct InternalState
 {
@@ -14,26 +18,19 @@ struct InternalState
 namespace Scal { namespace Platform
 {
 
-    LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        switch (message)
-        {
-            case WM_SIZE:
-            {
+    GlobalVariable LARGE_INTEGER Frequency;
+    GlobalVariable LARGE_INTEGER StartTime;
 
-            } break;
-        }
-        return 0;
-    }
+    LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
 
-    bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int height, int width)
+    bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int width, int height)
     {
         platformState->InternalState = malloc(sizeof(InternalState));
         InternalState* state = (InternalState*)platformState->InternalState;
         if (!state) return false; // TODO is it safe to ignore this? handle crashing
         state->Instance = GetModuleHandleA(0);
 
-        WNDCLASSA windowClass = {};
+        WNDCLASSA windowClass = {0};
         windowClass.style = CS_DBLCLKS;
         windowClass.lpfnWndProc = Win32WindowProcessMessage;
         windowClass.hInstance = state->Instance;
@@ -46,25 +43,165 @@ namespace Scal { namespace Platform
             return false;
         }
 
+        state->Window = CreateWindowExA(
+            0,
+            windowClass.lpszClassName,
+            applicationName,
+            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            0,
+            0,
+            state->Instance,
+            0);
+
+        if (!state->Window)
+        {
+            return false;
+        }
+
+        QueryPerformanceFrequency(&Frequency);
+        QueryPerformanceCounter(&StartTime);
+
         return true;
     }
 
-    void Shutdown(PlatformState* platformState);
+    void Shutdown(PlatformState* platformState)
+    {
+        InternalState* state = (InternalState*)platformState->InternalState;
+        if (state->Window)
+        {
+            DestroyWindow(state->Window);
+        }
+    }
 
-    bool ProcessMessage(PlatformState* platformState);
+    bool ProcessMessages(PlatformState* platformState)
+    {
+        MSG message;
+        BOOL result;
+        while ((result = GetMessageA(&message, 0, 0, 0)) > 0)
+        {
+            TranslateMessage(&message);
+            DispatchMessageA(&message);
+        }
+        return result == -1;
+    }
 
-    void* Allocate(uint64_t size, bool aligned);
-    void  Free(void* block, bool aligned);
-    void* ZeroMem(void* block, uint64_t size);
-    void* CopyMem(void* dest, const void* src, uint64_t size);
-    void* SetMem(void* dest, int value, uint64_t size);
+    void* Allocate(uint64_t size, bool aligned)
+    {
+        return malloc(size);
+    }
 
-    void ConsoleWrite(const char* message, uint8_t color);
-    void ConsoleWriteError(const char* message, uint8_t color);
+    void  Free(void* block, bool aligned)
+    {
+        return free(block);
+    }
 
-    uint64_t GetPlatformTime();
+    void* ZeroMem(void* block, uint64_t size)
+    {
+        return memset(block, 0, size);
+    }
 
-    void Sleep(uint32_t ms);
+    void* CopyMem(void* dest, const void* src, uint64_t size)
+    {
+        return memcpy(dest, src, size);
+    }
+
+    void* SetMem(void* dest, int value, uint64_t size)
+    {
+        return memset(dest, value, size);
+    }
+
+    void ConsoleWrite(const char* message, uint8_t color)
+    {
+        HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        const uint8_t levels[6] = { 64, 4, 6, 2, 1, 8 };
+        SetConsoleTextAttribute(consoleHandle, levels[color]);
+
+        OutputDebugStringA(message);
+        size_t length = strlen(message);
+        WriteConsoleA(consoleHandle, message, (DWORD)length, 0, 0);
+    }
+
+    void ConsoleWriteError(const char* message, uint8_t color)
+    {
+        HANDLE consoleHandle = GetStdHandle(STD_ERROR_HANDLE);
+        const uint8_t levels[6] = { 64, 4, 6, 2, 1, 8 };
+        SetConsoleTextAttribute(consoleHandle, levels[color]);
+
+        OutputDebugStringA(message);
+        size_t length = strlen(message);
+        WriteConsoleA(consoleHandle, message, (DWORD)length, 0, 0);
+    }
+
+    uint64_t GetPlatformTime()
+    {
+        LARGE_INTEGER now;
+        QueryPerformanceCounter(&now);
+        return now.QuadPart;
+    }
+
+    void PlatformSleep(uint32_t ms)
+    {
+        Sleep(ms);
+    }
+
+    LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+        LRESULT result = 0;
+        switch (message)
+        {
+            case WM_CLOSE:
+            {
+                SDEBUG("Closed!");
+                PostQuitMessage(0);
+            } break;
+            case WM_DESTROY:
+            {
+                SDEBUG("Destroy");
+
+            } break;
+            case WM_SIZE:
+            {
+                SDEBUG("Resized!");
+            } break;
+            case WM_KEYDOWN:
+            case WM_SYSKEYDOWN:
+            case WM_KEYUP:
+            case WM_SYSKEYUP:
+            {
+                bool pressed = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
+
+            } break;
+            case WM_MOUSEMOVE:
+            {
+                int xPos = GET_X_LPARAM(lParam);
+                int yPos = GET_Y_LPARAM(lParam);
+            } break;
+            case WM_MOUSEWHEEL:
+            {
+                int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+                if (delta != 0)
+                    delta = (delta > 0) ? 1 : -1; // Flatten between -1 to 1
+            } break;
+            case WM_LBUTTONDOWN:
+            case WM_MBUTTONDOWN:
+            case WM_RBUTTONDOWN:
+            case WM_LBUTTONUP:
+            case WM_MBUTTONUP:
+            case WM_RBUTTONUP:
+            {
+                bool pressed = message == WM_LBUTTONDOWN || message == WM_MBUTTONDOWN || message == WM_RBUTTONDOWN;
+            } break;
+            default:
+            {
+                result = DefWindowProcA(window, message, wParam, lParam);
+            } break;
+        }
+        return result;
+    }
 
 }}
 #endif

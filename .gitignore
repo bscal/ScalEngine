@@ -1,3 +1,5 @@
+Directory.build.props
+
 bin/
 bin-int/
 .vs/
