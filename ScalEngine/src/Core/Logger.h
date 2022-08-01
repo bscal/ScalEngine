@@ -4,7 +4,7 @@
 
 namespace Scal
 {
-	enum class LogLevel : uint8_t
+	enum LogLevel : uint8_t
 	{
 		Fatal = 0,
 		Error,
@@ -18,7 +18,7 @@ namespace Scal
 
 	void ShutdownLogging();
 
-	SCAL_API void Log(LogLevel level, const char* msg, ...);
+	SAPI void Log(LogLevel level, const char* msg, ...);
 }
 
 #define LOG_WARN 1
@@ -27,6 +27,7 @@ namespace Scal
 #define LOG_TRACE 1
 
 #ifdef SCAL_RELEASE
+
 #define LOG_DEBUG 0
 #define LOG_TRACE 0
 #endif

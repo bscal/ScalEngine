@@ -9,11 +9,11 @@ namespace Scal { namespace Platform
         void* InternalState;
     };
 
-    SCAL_API bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int height, int width);
+    SAPI bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int height, int width);
 
-    SCAL_API void Shutdown(PlatformState* platformState);
+    SAPI void Shutdown(PlatformState* platformState);
 
-    SCAL_API bool ProcessMessages(PlatformState* platformState);
+    SAPI bool ProcessMessages(PlatformState* platformState);
 
     void* Allocate(uint64_t size, bool aligned);
     void  Free(void* block, bool aligned);

@@ -6,7 +6,7 @@ namespace Scal
 {
 	struct Application
 	{
-		SCAL_API void Print(int i);
+		SAPI void Print(int i);
 	};
 
 	void Run(Application* app);

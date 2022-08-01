@@ -11,8 +11,8 @@ namespace Scal
 		LARGE_INTEGER StartCounter;
 		uint64_t StartCycleCount;
 
-		SCAL_API Timer();
-		SCAL_API ~Timer();
+		SAPI Timer();
+		SAPI ~Timer();
 	};
 
 	struct PersistentTimer
@@ -21,8 +21,8 @@ namespace Scal
 		LARGE_INTEGER LastCounter;
 		uint64_t LastCycleCount;
 
-		SCAL_API PersistentTimer();
-		SCAL_API void Stop();
+		SAPI PersistentTimer();
+		SAPI void Stop();
 	};
 
 }

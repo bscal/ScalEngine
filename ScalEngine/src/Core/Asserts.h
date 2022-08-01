@@ -4,7 +4,7 @@
 
 namespace Scal
 {
-	SCAL_API void ReportAssertionFailure(const char* expression, const char* msg, const char* file, int line);
+	SAPI void ReportAssertionFailure(const char* expression, const char* msg, const char* file, int line);
 }
 
 #define SCAL_ASSERTIONS_ENABLED
