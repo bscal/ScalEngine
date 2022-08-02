@@ -2,18 +2,18 @@
 
 #include "Core/Core.h"
 
-namespace Scal { namespace Platform
+namespace Scal
 {
     struct PlatformState
     {
         void* InternalState;
     };
 
-    SAPI bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int height, int width);
+    bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int height, int width);
 
-    SAPI void Shutdown(PlatformState* platformState);
+    void Shutdown(PlatformState* platformState);
 
-    SAPI bool ProcessMessages(PlatformState* platformState);
+    bool ProcessMessages(PlatformState* platformState);
 
     void* Allocate(uint64_t size, bool aligned);
     void  Free(void* block, bool aligned);
@@ -28,4 +28,4 @@ namespace Scal { namespace Platform
     
     void PlatformSleep(uint32_t ms);
 
-}}
+}

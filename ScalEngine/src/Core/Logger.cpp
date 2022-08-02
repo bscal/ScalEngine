@@ -25,7 +25,7 @@ namespace Scal
 		bool isError = (uint8_t)level < (uint8_t)LogLevel::Warn;
 
 		char outMessage[1024];
-		Scal::Platform::ZeroMem(outMessage, sizeof(outMessage));
+		ZeroMem(outMessage, sizeof(outMessage));
 
 		va_list argPtr;
 		va_start(argPtr, msg);
@@ -36,9 +36,9 @@ namespace Scal
 		sprintf_s(outMessageTemp, "%s%s\n", Prefixes[(int)level], outMessage);
 
 		if (isError)
-			Scal::Platform::ConsoleWriteError(outMessageTemp, (uint8_t)level);
+			ConsoleWriteError(outMessageTemp, (uint8_t)level);
 		else
-			Scal::Platform::ConsoleWrite(outMessageTemp, (uint8_t)level);
+			ConsoleWrite(outMessageTemp, (uint8_t)level);
 	}
 
 	void ReportAssertionFailure(const char* expression, const char* msg, const char* file, int line)

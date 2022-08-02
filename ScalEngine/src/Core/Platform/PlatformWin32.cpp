@@ -15,7 +15,7 @@ struct InternalState
     HWND Window;
 };
 
-namespace Scal { namespace Platform
+namespace Scal
 {
 
     GlobalVariable LARGE_INTEGER Frequency;
@@ -48,10 +48,10 @@ namespace Scal { namespace Platform
             windowClass.lpszClassName,
             applicationName,
             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
+            x,
+            y,
+            width,
+            height,
             0,
             0,
             state->Instance,
@@ -79,14 +79,19 @@ namespace Scal { namespace Platform
 
     bool ProcessMessages(PlatformState* platformState)
     {
+        // TODO what is the best way to do messages? 1 per frame, or until empty?
         MSG message;
-        BOOL result;
-        while ((result = GetMessageA(&message, 0, 0, 0)) > 0)
+        BOOL result = GetMessageA(&message, 0, 0, 0);
+        if (result > 0)
         {
             TranslateMessage(&message);
             DispatchMessageA(&message);
         }
-        return result == -1;
+        else
+        {
+            return false;
+        }
+        return true;
     }
 
     void* Allocate(uint64_t size, bool aligned)
@@ -203,5 +208,5 @@ namespace Scal { namespace Platform
         return result;
     }
 
-}}
+}
 #endif

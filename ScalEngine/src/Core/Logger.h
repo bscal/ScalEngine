@@ -4,7 +4,7 @@
 
 namespace Scal
 {
-	enum LogLevel : uint8_t
+	enum class LogLevel : uint8_t
 	{
 		Fatal = 0,
 		Error,

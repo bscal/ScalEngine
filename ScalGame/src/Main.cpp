@@ -1,27 +1,31 @@
-#include <Scal.h>
-#include <Core/Logger.h>
-#include <Core/Asserts.h>
-#include <Core/Timing.h>
-#include "Core/Platform/Platform.h"
+#include "Game.h"
+
+GlobalVariable Scal::GameState State;
 
 int main()
 { 
-	Scal::PersistentTimer persistentTimer = {};
-
-	SINFO("Logging %s values, %d", "a", 123);
-	SFATAL("FATAL %f ERROR", 0.00525f);
-	STRACE("HELLO %i", 1234109123);
-	SERROR("%i %f %s", 99, 15.28, "This");
-
-	Scal::Platform::PlatformState platformState;
-	if (Scal::Platform::Startup(&platformState, "Scal Game", 0, 0, 0, 0))
+	Scal::ApplicationGame gameInstance;
+	gameInstance.Config = 
 	{
-		while (true)
-		{
-			if (!Scal::Platform::ProcessMessages(&platformState))
-				break;
-		}
+		"Scal Game",
+		64,
+		64,
+		1280,
+		720
+	};
+	gameInstance.Initialize = Scal::GameInitialize;
+	gameInstance.Update = Scal::GameUpdate;
+	gameInstance.Render = Scal::GameRender;
+	gameInstance.OnResize = Scal::GameOnResize;
+	gameInstance.State = &State;
+
+	if (!Scal::AppCreate(&gameInstance))
+	{
+		SERROR("App failed to create!");
+		return 1;
 	}
-	persistentTimer.Stop();
+
+	Scal::AppRun();
+
 	return 0;
 }
