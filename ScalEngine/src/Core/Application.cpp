@@ -19,7 +19,7 @@ namespace Scal
 	GlobalVariable bool IsInitialized;
 	GlobalVariable ApplicationState AppState;
 
-	SAPI bool AppCreate(ApplicationGame* gameInstance)
+	bool AppCreate(ApplicationGame* gameInstance)
 	{
 		if (IsInitialized)
 		{
@@ -60,7 +60,7 @@ namespace Scal
 		return IsInitialized = true;
 	}
 
-	SAPI bool AppRun()
+	bool AppRun()
 	{
 		while (AppState.IsRunning)
 		{

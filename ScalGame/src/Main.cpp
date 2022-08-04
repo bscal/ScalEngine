@@ -1,11 +1,12 @@
 #include "Game.h"
 
 GlobalVariable Scal::GameState State;
+GlobalVariable Scal::ApplicationGame gameInstance;
 
-int main()
-{ 
-	Scal::ApplicationGame gameInstance;
-	gameInstance.Config = 
+Scal::ApplicationGame* CreateApplication(Scal::ApplicationCmdLineArgs args)
+{
+	//Scal::ApplicationGame gameInstance;
+	gameInstance.Config =
 	{
 		"Scal Game",
 		64,
@@ -18,14 +19,20 @@ int main()
 	gameInstance.Render = Scal::GameRender;
 	gameInstance.OnResize = Scal::GameOnResize;
 	gameInstance.State = &State;
-
-	if (!Scal::AppCreate(&gameInstance))
-	{
-		SERROR("App failed to create!");
-		return 1;
-	}
-
-	Scal::AppRun();
-
-	return 0;
+	return &gameInstance;
 }
+
+//int main()
+//{ 
+//
+//
+//	if (!Scal::AppCreate(&gameInstance))
+//	{
+//		SERROR("App failed to create!");
+//		return 1;
+//	}
+//
+//	Scal::AppRun();
+//
+//	return 0;
+//}

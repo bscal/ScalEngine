@@ -14,7 +14,7 @@ namespace Scal
 		#include <intrin.h>
 		#define DebugBreak(void) __debugbreak()
 	#else
-		#define DebugBreak(void)
+		#define DebugBreak(void) __builtin_trap()
 	#endif
 
 #define SASSERT(expr)											\

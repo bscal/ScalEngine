@@ -19,7 +19,7 @@ namespace Scal
 	void ShutdownLogging();
 
 	SAPI void Log(LogLevel level, const char* msg, ...);
-}
+
 
 #define LOG_WARN 1
 #define LOG_INFO 1
@@ -59,3 +59,4 @@ namespace Scal
 #define STRACE
 #endif
 
+}

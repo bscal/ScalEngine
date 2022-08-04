@@ -1,9 +1,24 @@
 #pragma once
 
 #include "Core.h"
+#include "SAssert.h"
+
+int main(int argc, char** argv);
 
 namespace Scal
 {
+
+	struct ApplicationCmdLineArgs
+	{
+		int Count;
+		char** Args;
+
+		constexpr const char* operator[](int index) const
+		{
+			SASSERT(index < Count);
+			return Args[index];
+		}
+	};
 
 	struct ApplicationConfig
 	{
@@ -29,5 +44,7 @@ namespace Scal
 	SAPI bool AppCreate(ApplicationGame* gameInstance);
 
 	SAPI bool AppRun();
+
+	extern SAPI ApplicationGame* CreateApplication(ApplicationCmdLineArgs args);
 
 }

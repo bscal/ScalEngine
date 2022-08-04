@@ -1,5 +1,5 @@
 #include "Logger.h"
-#include "Asserts.h"
+#include "SAssert.h"
 #include "Platform/Platform.h"
 
 #include <stdio.h>
