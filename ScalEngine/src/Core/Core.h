@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
-//#define internal        static
+#define internal static
 //#define local_persist	static
-#define GlobalVariable		static
+#define global_var static
 
 #ifdef SCAL_PLATFORM_WINDOWS
 	#ifdef SCAL_BUILD_DLL

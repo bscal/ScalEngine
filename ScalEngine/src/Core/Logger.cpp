@@ -8,7 +8,7 @@
 
 namespace Scal
 {
-	GlobalVariable const char* Prefixes[6] = { "[FATAL]: ", "[ERROR]: ", "[WARN]: ", "[INFO]: ", "[DEBUG]: ", "[TRACE]: " };
+	global_var const char* Prefixes[6] = { "[FATAL]: ", "[ERROR]: ", "[WARN]: ", "[INFO]: ", "[DEBUG]: ", "[TRACE]: " };
 
 	int InitializeLogging()
 	{

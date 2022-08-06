@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Core.h"
-#include "SAssert.h"
-
-int main(int argc, char** argv);
 
 namespace Scal
 {
@@ -13,11 +10,7 @@ namespace Scal
 		int Count;
 		char** Args;
 
-		constexpr const char* operator[](int index) const
-		{
-			SASSERT(index < Count);
-			return Args[index];
-		}
+		constexpr const char* operator[](int index) const;
 	};
 
 	struct ApplicationConfig
@@ -41,10 +34,11 @@ namespace Scal
 		void* State; // GameState, this is managed by the game
 	};
 
-	SAPI bool AppCreate(ApplicationGame* gameInstance);
+	SAPI bool AppInitialize(ApplicationGame* gameInstance);
 
 	SAPI bool AppRun();
 
-	extern SAPI ApplicationGame* CreateApplication(ApplicationCmdLineArgs args);
+	// defined in client
+	ApplicationGame* CreateApplication(ApplicationCmdLineArgs args);
 
 }

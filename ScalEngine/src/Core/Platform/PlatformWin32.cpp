@@ -18,8 +18,8 @@ struct InternalState
 namespace Scal
 {
 
-    GlobalVariable LARGE_INTEGER Frequency;
-    GlobalVariable LARGE_INTEGER StartTime;
+    global_var LARGE_INTEGER Frequency;
+    global_var LARGE_INTEGER StartTime;
 
     LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
 

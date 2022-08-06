@@ -26,10 +26,9 @@ namespace Scal
 #define LOG_DEBUG 1
 #define LOG_TRACE 1
 
-#ifdef SCAL_RELEASE
-
-#define LOG_DEBUG 0
-#define LOG_TRACE 0
+#ifndef SCAL_RELEASE
+#define LOG_DEBUG 1
+#define LOG_TRACE 1
 #endif
 
 #define SFATAL(msg, ...) Scal::Log(Scal::LogLevel::Fatal, msg, ##__VA_ARGS__)

@@ -1,20 +1,17 @@
 #pragma once
 
 #include <Scal.h>
-#include <stdint.h>
+#include <Core/Application.h>
 
-namespace Scal
+struct GameState
 {
-	struct GameState
-	{
-		float DeltaTime;
-	};
+	float DeltaTime;
+};
 
-	bool GameInitialize(ApplicationGame* gameInstance);
+bool GameInitialize(Scal::ApplicationGame* gameInstance);
 
-	bool GameUpdate(ApplicationGame* gameInstance, float dt);
+bool GameUpdate(Scal::ApplicationGame* gameInstance, float dt);
 
-	bool GameRender(ApplicationGame* gameInstance, float dt);
+bool GameRender(Scal::ApplicationGame* gameInstance, float dt);
 
-	void GameOnResize(ApplicationGame* gameInstance, uint32_t newWidth, uint32_t newHeight);
-}
+void GameOnResize(Scal::ApplicationGame* gameInstance, uint32_t newWidth, uint32_t newHeight);

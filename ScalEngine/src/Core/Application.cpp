@@ -1,6 +1,7 @@
 #include "Application.h"
 
 #include "Logger.h"
+#include "SAssert.h"
 #include "Platform/Platform.h"
 
 namespace Scal
@@ -16,10 +17,10 @@ namespace Scal
 		bool IsSuspended;
 	};
 
-	GlobalVariable bool IsInitialized;
-	GlobalVariable ApplicationState AppState;
+	global_var bool IsInitialized;
+	global_var ApplicationState AppState;
 
-	bool AppCreate(ApplicationGame* gameInstance)
+	bool AppInitialize(ApplicationGame* gameInstance)
 	{
 		if (IsInitialized)
 		{
@@ -86,5 +87,11 @@ namespace Scal
 		AppState.IsRunning = false;
 
 		return true;
+	}
+
+	constexpr const char* ApplicationCmdLineArgs::operator[](int index) const
+	{
+		SASSERT(index < Count);
+		return Args[index];
 	}
 }
