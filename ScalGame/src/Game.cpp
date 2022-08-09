@@ -1,6 +1,7 @@
 #include "Game.h"
 
 #include <Core/EntryPoint.h>
+#include <Core/SMemory.h>
 
 bool GameInitialize(Scal::ApplicationGame* gameInstance)
 {
@@ -43,5 +44,12 @@ Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	gameInstance.Render = GameRender;
 	gameInstance.OnResize = GameOnResize;
 	gameInstance.State = &State;
+
+	auto block = SAlloc(512, Scal::MemoryTag::Entity);
+	auto block1 = SAlloc(2500, Scal::MemoryTag::Array);
+	auto block2 = SAlloc(1024 * 1024 + 250, Scal::MemoryTag::Application);
+
+	SINFO(Scal::GetMemoryUsage().c_str());
+
 	return &gameInstance;
 }
