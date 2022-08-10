@@ -38,6 +38,8 @@ namespace Scal
 
 	SAPI bool AppRun();
 
+	void AppStop();
+
 	// defined in client
 	ApplicationGame* CreateApplication(ApplicationCmdLineArgs args);
 

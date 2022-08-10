@@ -11,9 +11,9 @@ namespace Scal
 
     bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int height, int width);
 
-    void Shutdown(PlatformState* platformState);
+    void ProcessMessages(PlatformState* platformState);
 
-    bool ProcessMessages(PlatformState* platformState);
+    void Render(PlatformState* platformState, int xOffset, int yOffset);
 
     void* Allocate(uint64_t size, bool aligned);
     void  Free(void* block, bool aligned);

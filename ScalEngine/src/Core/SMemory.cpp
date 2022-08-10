@@ -112,7 +112,15 @@ namespace Scal
     std::string GetMemoryUsage()
     {
         std::string outputMessage;
-        outputMessage.append("System Memory Usage:\n");
+        outputMessage.append("System Memory Usage\n");
+
+        outputMessage.append("Total Memory: ");
+        outputMessage.append(std::to_string(Stats.TotalMemAllocated));
+        std::string memSize(16, '\0');
+        auto written = std::snprintf(&memSize[0], memSize.size(), "%.2f", Stats.TotalMemAllocated);
+        memSize.resize(written);
+        outputMessage.append(memSize);
+
         for (uint32_t i = 0; i < (uint32_t) MemoryTag::MaxTags; ++i)
         {
             outputMessage.append(MemoryTagStrings[i]);

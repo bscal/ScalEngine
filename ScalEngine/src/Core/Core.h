@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #define internal static
-//#define local_persist	static
+#define local_persist static
 #define global_var static
 
 #ifdef SCAL_PLATFORM_WINDOWS

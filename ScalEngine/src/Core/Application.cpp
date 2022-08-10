@@ -63,10 +63,14 @@ namespace Scal
 
 	bool AppRun()
 	{
+		int x = 0;
+		int y = 0;
+
 		while (AppState.IsRunning)
 		{
-			if (!ProcessMessages(&AppState.State))
-				break;
+			ProcessMessages(&AppState.State);
+
+			Render(&AppState.State, x--, y--);
 
 			if (!AppState.IsSuspended)
 			{
@@ -83,10 +87,13 @@ namespace Scal
 				}
 			}
 		}
-	
-		AppState.IsRunning = false;
 
 		return true;
+	}
+
+	void AppStop()
+	{
+		AppState.IsRunning = false;
 	}
 
 	constexpr const char* ApplicationCmdLineArgs::operator[](int index) const
