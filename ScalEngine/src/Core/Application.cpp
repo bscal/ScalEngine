@@ -70,7 +70,7 @@ namespace Scal
 		{
 			ProcessMessages(&AppState.State);
 
-			Render(&AppState.State, x--, y--);
+			TestRender(&AppState.State, x--, y--);
 
 			if (!AppState.IsSuspended)
 			{

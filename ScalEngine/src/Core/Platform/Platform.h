@@ -4,16 +4,18 @@
 
 namespace Scal
 {
+    struct InternalState;
+    
     struct PlatformState
     {
-        void* InternalState;
+        InternalState* InternalState;
     };
 
     bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int height, int width);
 
     void ProcessMessages(PlatformState* platformState);
 
-    void Render(PlatformState* platformState, int xOffset, int yOffset);
+    void TestRender(PlatformState* platformState, int xOffset, int yOffset);
 
     void* Allocate(uint64_t size, bool aligned);
     void  Free(void* block, bool aligned);

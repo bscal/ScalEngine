@@ -11,28 +11,63 @@
 #include <windowsx.h>
 #include <stdlib.h>
 
-struct InternalState
-{
-	HINSTANCE Instance;
-	HWND Window;
-};
-
 namespace Scal
 {
 
 	global_var LARGE_INTEGER Frequency;
 	global_var LARGE_INTEGER StartTime;
 
+	struct InternalState
+	{
+		HINSTANCE Instance;
+		HWND Window;
+	};
+
+	struct WindowBuffer
+	{
+		BITMAPINFO Info;
+		void* Memory;
+		int Width;
+		int Height;
+		int Pitch;
+	};
+
+	global_var WindowBuffer MainBackBuffer;
+
+	internal void Win32InitializeWindowBuffer(WindowBuffer* buffer, int width, int height)
+	{
+		if (buffer->Memory)
+		{
+			VirtualFree(buffer->Memory, 0, MEM_RELEASE);
+		}
+
+		buffer->Width = width;
+		buffer->Height = height;
+		int bytesPerPixel = 4;
+		buffer->Pitch = width * bytesPerPixel;
+
+		buffer->Info.bmiHeader.biSize = sizeof(buffer->Info.bmiHeader);
+		buffer->Info.bmiHeader.biWidth = width;
+		buffer->Info.bmiHeader.biHeight = height;
+		buffer->Info.bmiHeader.biPlanes = 1;
+		buffer->Info.bmiHeader.biBitCount = 32;
+		buffer->Info.bmiHeader.biCompression = BI_RGB;
+
+		int size = width * height * bytesPerPixel;
+		// TODO look into replacing or moving into SMemory
+		buffer->Memory = VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
+	}
+
 	LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
 
 	bool Startup(PlatformState* platformState, const char* applicationName, int x, int y, int width, int height)
 	{
-		platformState->InternalState = malloc(sizeof(InternalState));
+		platformState->InternalState = (InternalState*)SAlloc(sizeof(InternalState), MemoryTag::Application);
 		InternalState* state = (InternalState*)platformState->InternalState;
 		if (!state) return false; // TODO is it safe to ignore this? handle crashing
 		state->Instance = GetModuleHandleA(0);
 
-		WNDCLASSA windowClass = { 0 };
+		WNDCLASSA windowClass = {};
 		windowClass.style = CS_DBLCLKS;
 		windowClass.lpfnWndProc = Win32WindowProcessMessage;
 		windowClass.hInstance = state->Instance;
@@ -50,12 +85,8 @@ namespace Scal
 			windowClass.lpszClassName,
 			applicationName,
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-			x,
-			y,
-			width,
-			height,
-			0,
-			0,
+			x, y, width, height,
+			0, 0,
 			state->Instance,
 			0);
 
@@ -63,6 +94,8 @@ namespace Scal
 		{
 			return false;
 		}
+
+		Win32InitializeWindowBuffer(&MainBackBuffer, width, height);
 
 		QueryPerformanceFrequency(&Frequency);
 		QueryPerformanceCounter(&StartTime);
@@ -140,36 +173,38 @@ namespace Scal
 		Sleep(ms);
 	}
 
-	// TODO move
-	global_var BITMAPINFO BitmapInfo;
-	global_var void* BitmapMemory;
-	global_var int BitmapWidth;
-	global_var int BitmapHeight;
-	constexpr int BytesPerPixel = 4;
-
-	internal void Win32UpdateWindow(HDC deviceCtx, const RECT& windowRect, int x, int y, int width, int height)
+	struct WindowDimension
 	{
-		int windowWidth = windowRect.right - windowRect.left;
-		int windowHeight = windowRect.bottom - windowRect.top;
+		int Width;
+		int Height;
+	};
+
+	WindowDimension GetWindowDimension(HWND window)
+	{
+		RECT clientRect;
+		GetClientRect(window, &clientRect);
+		return { clientRect.right - clientRect.left, clientRect.bottom - clientRect.top };
+	}
+
+	internal void DrawToWindow(WindowBuffer* buffer, HDC deviceCtx, int windowWidth, int windowHeight)
+	{
 		StretchDIBits(deviceCtx,
-			0, 0, BitmapWidth, BitmapHeight,
 			0, 0, windowWidth, windowHeight,
-			BitmapMemory,
-			&BitmapInfo,
+			0, 0, buffer->Width, buffer->Height,
+			buffer->Memory,
+			&buffer->Info,
 			DIB_RGB_COLORS,
 			SRCCOPY);
 	}
 
-
 	// TODO move testing purposes
-	void Render(PlatformState* platformState, int xOffset, int yOffset)
+	internal void UpdatePixels(WindowBuffer* buffer, int xOffset, int yOffset)
 	{
-		int pitch = BitmapWidth * BytesPerPixel;
-		uint8_t* row = (uint8_t*)BitmapMemory;
-		for (int y = 0; y < BitmapHeight; ++y)
+		uint8_t* row = (uint8_t*)buffer->Memory;
+		for (int y = 0; y < buffer->Height; ++y)
 		{
 			uint32_t* pixel = (uint32_t*)row;
-			for (int x = 0; x < BitmapWidth; ++x)
+			for (int x = 0; x < buffer->Width; ++x)
 			{
 				uint8_t r = (uint8_t)(x + xOffset);
 				uint8_t g = (uint8_t)(y + xOffset);
@@ -179,41 +214,24 @@ namespace Scal
 				// AA RR GG BB in register
 				*pixel++ = ((r << 16) | (g << 8) | b);
 			}
-			row += pitch;
+			row += buffer->Pitch;
 		}
-
-		auto state = (InternalState*)platformState->InternalState;
-		auto deviceCtx = GetDC(state->Window);
-		RECT clientRect;
-		GetClientRect(state->Window, &clientRect);
-		Win32UpdateWindow(deviceCtx, clientRect, 0, 0,
-			clientRect.right - clientRect.left,
-			clientRect.bottom - clientRect.top);
-		ReleaseDC(state->Window, deviceCtx);
 	}
 
-	internal void Win32ResizeDIBSection(int width, int height)
+	// TODO just for testing
+	void TestRender(PlatformState* platformState, int xOffset, int yOffset)
 	{
-		if (BitmapMemory)
-		{
-			VirtualFree(BitmapMemory, 0, MEM_RELEASE);
-		}
+		UpdatePixels(&MainBackBuffer, xOffset, yOffset);
 
-		BitmapWidth = width;
-		BitmapHeight = height;
-
-		BitmapInfo.bmiHeader.biSize = sizeof(BitmapInfo.bmiHeader);
-		BitmapInfo.bmiHeader.biWidth = width;
-		BitmapInfo.bmiHeader.biHeight = height;
-		BitmapInfo.bmiHeader.biPlanes = 1;
-		BitmapInfo.bmiHeader.biBitCount = 32;
-		BitmapInfo.bmiHeader.biCompression = BI_RGB;
-
-		int size = width * height * BytesPerPixel;
-		BitmapMemory = VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
+		auto deviceCtx = GetDC(platformState->InternalState->Window);
+		auto windowDimension = GetWindowDimension(platformState->InternalState->Window);
+		DrawToWindow(&MainBackBuffer, deviceCtx, 
+			windowDimension.Width, windowDimension.Height);
+		ReleaseDC(platformState->InternalState->Window, deviceCtx);
 	}
 
-	internal LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+	internal LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message,
+		WPARAM wParam, LPARAM lParam)
 	{
 		LRESULT result = 0;
 		switch (message)
@@ -221,31 +239,26 @@ namespace Scal
 			case WM_CLOSE:
 			{
 				AppStop();
-				SDEBUG("Closed!");
 			} break;
 			case WM_DESTROY:
 			{
 				AppStop();
-				SDEBUG("Destroy");
-
 			} break;
 			case WM_SIZE:
 			{
-				RECT rect;
-				GetClientRect(window, &rect);
-				int w = rect.right - rect.left;
-				int h = rect.bottom - rect.top;
-				Win32ResizeDIBSection(w, h);
-
-				SDEBUG("Resized!");
 			} break;
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
 			case WM_KEYUP:
 			case WM_SYSKEYUP:
 			{
-				bool pressed = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
-
+				bool wasDown = (lParam & (1 << 30)) != 0;
+				bool isDown = (lParam & (1 << 31)) == 0;
+				uint32_t keycode = wParam;
+				if (keycode == 'W')
+				{
+					SINFO("Key: %c, WasDown: %d, IsDown: %d", 'W', wasDown, isDown);
+				}
 			} break;
 			case WM_MOUSEMOVE:
 			{
@@ -271,14 +284,9 @@ namespace Scal
 			{
 				PAINTSTRUCT paint;
 				HDC deviceCtx = BeginPaint(window, &paint);
-				RECT clientRect;
-				GetClientRect(window, &clientRect);
-				Win32UpdateWindow(deviceCtx,
-					clientRect,
-					paint.rcPaint.left,
-					paint.rcPaint.top,
-					paint.rcPaint.right - paint.rcPaint.left,
-					paint.rcPaint.bottom - paint.rcPaint.top);
+				auto windowDimension = GetWindowDimension(window);
+				DrawToWindow(&MainBackBuffer, deviceCtx,
+					windowDimension.Width, windowDimension.Height);
 				EndPaint(window, &paint);
 			} break;
 			default:
