@@ -14,8 +14,25 @@ bool GameUpdate(Scal::ApplicationGame* gameInstance, float dt)
 	return true;
 }
 
-bool GameRender(Scal::ApplicationGame* gameInstance, float dt)
+bool GameRender(Scal::ApplicationGame* gameInstance,
+	Scal::ApplicationWindowBuffer* windowBuffer, int xOffset, int yOffset, float dt)
 {
+	uint8_t* row = (uint8_t*)windowBuffer->Memory;
+	for (int y = 0; y < windowBuffer->Height; ++y)
+	{
+		uint32_t* pixel = (uint32_t*)row;
+		for (int x = 0; x < windowBuffer->Width; ++x)
+		{
+			uint8_t r = (uint8_t)(x + xOffset);
+			uint8_t g = (uint8_t)(y + yOffset);
+			uint8_t b = 0;
+
+			// BB GG RR AA in memory
+			// AA RR GG BB in register
+			*pixel++ = ((r << 16) | (g << 8) | b);
+		}
+		row += windowBuffer->Pitch;
+	}
 	return true;
 }
 

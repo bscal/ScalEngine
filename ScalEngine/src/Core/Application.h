@@ -22,6 +22,14 @@ namespace Scal
 		uint16_t Height;
 	};
 
+	struct ApplicationWindowBuffer
+	{
+		void* Memory;
+		int Width;
+		int Height;
+		int Pitch;
+	};
+
 	// TODO maybe think about making these methods
 	// Struct represting the state of the game, will be passed to the engine
 	struct ApplicationGame
@@ -29,7 +37,8 @@ namespace Scal
 		ApplicationConfig Config;
 		bool (*Initialize)(struct ApplicationGame* gameInstance);
 		bool (*Update)(struct ApplicationGame* gameInstance, float deltaTime);
-		bool (*Render)(struct ApplicationGame* gameInstance, float deltaTime);
+		bool (*Render)(struct ApplicationGame* gameInstance,
+			struct ApplicationWindowBuffer* windowBuffer, int xOffset, int yOffset, float dt);
 		void (*OnResize)(struct ApplicationGame* gameInstance, uint32_t newWidth, uint32_t newHeight);
 		void* State; // GameState, this is managed by the game
 	};
