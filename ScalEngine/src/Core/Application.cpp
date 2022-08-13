@@ -103,4 +103,5 @@ constexpr const char* ApplicationCmdLineArgs::operator[](int index) const
 	SASSERT(index < Count);
 	return Args[index];
 }
+
 }
