@@ -2,6 +2,7 @@
 
 #include <Core/EntryPoint.h>
 #include <Core/SMemory.h>
+#include "Core/Structures/SArray.h"
 
 bool GameInitialize(Scal::ApplicationGame* gameInstance)
 {
@@ -44,7 +45,7 @@ global_var GameState State;
 
 Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 {
-	ApplicationGame* gameInstance = (ApplicationGame*) SAlloc(sizeof(ApplicationGame), MemoryTag::Application);
+	ApplicationGame* gameInstance = (ApplicationGame*)SAlloc(sizeof(ApplicationGame), MemoryTag::Application);
 	gameInstance->Config =
 	{
 		"Scal Game",
@@ -59,6 +60,13 @@ Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	gameInstance->OnResize = GameOnResize;
 	gameInstance->State = &State;
 
+	Scal::Structures::SArray* sArray = Scal::Structures::_ArrayCreate(2, sizeof(int));
+	SArrayPush(sArray, 5);
+	SArrayPush(sArray, 255);
+	SArrayPush(sArray, 100000);
+
+	SINFO("%d", sizeof(Scal::Structures::SArray));
+	SINFO("%d", sArray->Capacity * sArray->Stride);
 	SINFO(Scal::GetMemoryUsage().c_str());
 
 	return gameInstance;
