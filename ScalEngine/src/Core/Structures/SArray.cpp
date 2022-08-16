@@ -8,7 +8,7 @@ namespace Scal
 {
 namespace Structures
 {
-SAPI SArray* _ArrayCreate(uint64_t capacity, uint64_t stride)
+SAPI SArray* ArrayCreate(uint64_t capacity, uint64_t stride)
 {
 	// TODO think how we want to create SArray struct.
 	SArray* sArray = (SArray*)SAlloc(sizeof(SArray), MemoryTag::DArray);
@@ -29,20 +29,19 @@ SAPI SArray* ArrayResize(SArray* array)
 	uint64_t oldMemorySizeInBytes = GetArrayMemorySize(array);
 	array->Capacity *= DEFAULT_RESIZE;
 	uint64_t newMemorySizeInBytes = GetArrayMemorySize(array);
-	void* newMemory = SAlloc(newMemorySizeInBytes, MemoryTag::DArray);
-	SZero(newMemory, newMemorySizeInBytes);
-	SCopy(newMemory, array->Memory, oldMemorySizeInBytes);
-	SFree(array->Memory, oldMemorySizeInBytes, MemoryTag::DArray);
-	array->Memory = newMemory;
+	SRealloc(array->Memory,
+		oldMemorySizeInBytes,
+		newMemorySizeInBytes,
+		MemoryTag::DArray);
 	return array;
 }
 
-SAPI uint64_t GetArrayMemorySize(SArray* array)
+SAPI constexpr uint64_t GetArrayMemorySize(SArray* array)
 {
 	return array->Capacity * array->Stride;
 }
 
-SAPI void* ArrayPush(SArray* array, const void* valuePtr)
+SAPI SArray* ArrayPush(SArray* array, const void* valuePtr)
 {
 	if (array->Length >= array->Capacity)
 	{
@@ -60,7 +59,8 @@ SAPI void ArrayPop(SArray* array, void* dest)
 {
 	if (array->Length == 0) return;
 	uint64_t offset = (array->Length - 1) * array->Stride;
-	SCopy(dest, &array[offset], array->Stride);
+	const char* mem = (char*)(array->Memory);
+	SCopy(dest, &mem[offset], array->Stride);
 	--array->Length;
 }
 
@@ -68,13 +68,32 @@ SAPI void* ArraySetAt(SArray* array, uint64_t index, const void* valuePtr)
 {
 	SASSERT(index < array->Length);
 	uint64_t offset = index * array->Stride;
-	return SCopy(&array[offset], valuePtr, array->Stride);
+	char* mem = (char*)(array->Memory);
+	void* dest = &mem[offset];
+	SCopy(&dest, valuePtr, array->Stride);
+	return dest;
 }
 
-SAPI void ArrayGetAt(SArray* array, uint64_t index, void* dest)
+SAPI void ArrayPopAt(SArray* array, uint64_t index, void* dest)
 {
+	SASSERT(index < array->Length);
 	uint64_t offset = index * array->Stride;
-	SCopy(dest, &array[offset], array->Stride);
+	char* mem = (char*)(array->Memory);
+	SCopy(dest, &mem[offset], array->Stride);
+
+	if (index != array->Length)
+	{
+		// Moves last element in array popped position
+		SCopy(&mem[offset], &mem[array->Length * array->Stride], array->Stride);
+	}
+
+	--array->Length;
+}
+
+SAPI void* ArrayPeekAt(SArray* array, uint64_t index)
+{
+	char* mem = (char*)array->Memory;
+	return &mem[index * array->Stride];
 }
 
 }

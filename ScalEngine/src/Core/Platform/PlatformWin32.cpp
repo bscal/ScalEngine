@@ -130,6 +130,11 @@ void* Allocate(uint64_t size, bool aligned)
 	return malloc(size);
 }
 
+void* Realloc(void* block, uint64_t newSize)
+{
+	return realloc(block, newSize);
+}
+
 void  Free(void* block, bool aligned)
 {
 	return free(block);

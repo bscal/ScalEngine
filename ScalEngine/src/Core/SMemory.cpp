@@ -36,8 +36,21 @@ void* SAlloc(uint64_t size, MemoryTag tag)
 	Stats.TotalMemAllocated += size;
 	Stats.TaggedAllocations[(int)tag] += size;
 
-	void* block = Platform::Allocate(size, false);
-	return block;
+	return Platform::Allocate(size, false);
+}
+
+void* SRealloc(void* address, uint64_t oldSize, uint64_t newSize, MemoryTag tag)
+{
+	if (tag == MemoryTag::Unknown)
+	{
+		SWARN("SAlloc called with tag: MemoryTag::Unknown!");
+	}
+
+	Stats.TotalMemAllocated -= oldSize;
+	Stats.TotalMemAllocated += newSize;
+	Stats.TaggedAllocations[(int)tag] -= oldSize;
+	Stats.TaggedAllocations[(int)tag] += newSize;
+	return Platform::Realloc(address, newSize);
 }
 
 void SFree(void* address, uint64_t size, MemoryTag tag)

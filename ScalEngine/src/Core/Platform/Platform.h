@@ -24,6 +24,7 @@ void TestRender();
 ApplicationWindowBuffer GetWindowBuffer();
 
 void* Allocate(uint64_t size, bool aligned);
+void* Realloc(void* block, uint64_t newSize);
 void  Free(void* block, bool aligned);
 void* ZeroMem(void* block, uint64_t size);
 void* CopyMem(void* dest, const void* src, uint64_t size);

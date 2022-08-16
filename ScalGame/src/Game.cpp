@@ -60,13 +60,26 @@ Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	gameInstance->OnResize = GameOnResize;
 	gameInstance->State = &State;
 
-	Scal::Structures::SArray* sArray = Scal::Structures::_ArrayCreate(2, sizeof(int));
+	Scal::Structures::SArray* sArray = Scal::Structures::SArrayCreate(int);
 	SArrayPush(sArray, 5);
 	SArrayPush(sArray, 255);
-	SArrayPush(sArray, 100000);
+	SArrayPush(sArray, -100000);
+	SArrayPush(sArray, -500 + 250);
+	SArrayPush(sArray, 65000);
 
-	SINFO("%d", sizeof(Scal::Structures::SArray));
-	SINFO("%d", sArray->Capacity * sArray->Stride);
+	
+	int* i = (int*)Scal::Structures::ArrayPeekAt(sArray, 1);
+	SINFO("i = %d", *i);
+	++* i;
+	SINFO("i = %d", *i);
+	int* ii = (int*)Scal::Structures::ArrayPeekAt(sArray, 1);
+	SINFO("i = %d", *ii);
+
+	int val;
+	Scal::Structures::ArrayPop(sArray, &val);
+	SINFO("pop: %d", val);
+	
+	SINFO("length: %d, capacity: %d, stride %d, sizeof: %d", sArray->Length, sArray->Capacity, sArray->Stride, sizeof(Scal::Structures::SArray));
 	SINFO(Scal::GetMemoryUsage().c_str());
 
 	return gameInstance;
