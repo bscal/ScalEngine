@@ -3,6 +3,7 @@
 #include "Logger.h"
 #include "SAssert.h"
 #include "Platform/Platform.h"
+#include "Input.h"
 
 namespace Scal
 {
@@ -64,6 +65,7 @@ bool AppInitialize(ApplicationGame* gameInstance)
 
 bool AppRun()
 {
+	float dt = 0.0f;
 	int x = 0;
 	int y = 0;
 
@@ -73,6 +75,8 @@ bool AppRun()
 
 		if (!AppState.IsSuspended)
 		{
+			Input::InputUpdate(dt);
+
 			if (!AppState.GameInstance->Update(AppState.GameInstance, 0.0f))
 			{
 				SFATAL("GameInstance Update failed. Exiting...");
@@ -89,7 +93,7 @@ bool AppRun()
 			Platform::TestRender();
 		}
 	}
-
+	
 	return true;
 }
 

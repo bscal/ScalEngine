@@ -15,7 +15,7 @@ struct SArray
 	uint64_t Stride;
 };
 
-#define DEFAULT_INITIAL_SIZE 4
+#define DEFAULT_INITIAL_SIZE 8
 #define DEFAULT_RESIZE 2
 
 SAPI SArray* ArrayCreate(uint64_t capacity, uint64_t stride);

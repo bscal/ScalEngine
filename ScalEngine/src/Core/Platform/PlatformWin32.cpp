@@ -6,6 +6,7 @@
 #include "Core/Logger.h"
 #include "Core/Application.h"
 #include "Core/SMemory.h"
+#include "Core/Input.h"
 
 #include <Windows.h>
 #include <windowsx.h>
@@ -247,6 +248,7 @@ internal LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message,
 			bool wasDown = (lParam & (1 << 30)) != 0;
 			bool isDown = (lParam & (1 << 31)) == 0;
 			uint32_t keycode = wParam;
+			Input::ProcessKey((Input::Keys)keycode, wasDown || isDown);
 			if (keycode == 'W')
 			{
 				SINFO("Key: %c, WasDown: %d, IsDown: %d", 'W', wasDown, isDown);
@@ -256,22 +258,33 @@ internal LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message,
 		{
 			int xPos = GET_X_LPARAM(lParam);
 			int yPos = GET_Y_LPARAM(lParam);
+			Input::ProcessMouseMove(xPos, yPos);
 		} break;
 		case WM_MOUSEWHEEL:
 		{
 			int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 			if (delta != 0)
 				delta = (delta > 0) ? 1 : -1; // Flatten between -1 to 1
+			Input::ProcessMouseWheel(delta);
 		} break;
 		case WM_LBUTTONDOWN:
+			Input::ProcessMouse(Input::Buttons::ButtonLeft, true);
+			break;
 		case WM_MBUTTONDOWN:
+			Input::ProcessMouse(Input::Buttons::ButtonMiddle, true);
+			break;
 		case WM_RBUTTONDOWN:
+			Input::ProcessMouse(Input::Buttons::ButtonRight, true);
+			break;
 		case WM_LBUTTONUP:
+			Input::ProcessMouse(Input::Buttons::ButtonLeft, false);
+			break;
 		case WM_MBUTTONUP:
+			Input::ProcessMouse(Input::Buttons::ButtonMiddle, false);
+			break;
 		case WM_RBUTTONUP:
-		{
-			bool pressed = message == WM_LBUTTONDOWN || message == WM_MBUTTONDOWN || message == WM_RBUTTONDOWN;
-		} break;
+			Input::ProcessMouse(Input::Buttons::ButtonRight, false);
+			break;
 		case WM_PAINT:
 		{
 			PAINTSTRUCT paint;

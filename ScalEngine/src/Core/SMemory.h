@@ -7,7 +7,7 @@
 namespace Scal
 {
 
-enum class MemoryTag
+enum class MemoryTag : int
 {
 	Unknown = 0,
 	Array,

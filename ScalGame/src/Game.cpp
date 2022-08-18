@@ -66,7 +66,6 @@ Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	SArrayPush(sArray, -100000);
 	SArrayPush(sArray, -500 + 250);
 	SArrayPush(sArray, 65000);
-
 	
 	int* i = (int*)Scal::Structures::ArrayPeekAt(sArray, 1);
 	SINFO("i = %d", *i);
