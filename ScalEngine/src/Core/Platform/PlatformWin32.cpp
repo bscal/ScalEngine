@@ -247,12 +247,11 @@ internal LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message,
 		{
 			bool wasDown = (lParam & (1 << 30)) != 0;
 			bool isDown = (lParam & (1 << 31)) == 0;
+			bool pressed = !wasDown && isDown;
+			bool held = wasDown && isDown;
+			bool released = wasDown && !isDown;
 			uint32_t keycode = wParam;
-			Input::ProcessKey((Input::Keys)keycode, wasDown || isDown);
-			if (keycode == 'W')
-			{
-				SINFO("Key: %c, WasDown: %d, IsDown: %d", 'W', wasDown, isDown);
-			}
+			Input::ProcessKey((Input::Keys)keycode, isDown, pressed, held, released);
 		} break;
 		case WM_MOUSEMOVE:
 		{

@@ -1,9 +1,9 @@
 #include "Application.h"
 
-#include "Logger.h"
-#include "SAssert.h"
-#include "Platform/Platform.h"
-#include "Input.h"
+#include "Core/Logger.h"
+#include "Core/SAssert.h"
+#include "Core/Input.h"
+#include "Core/Platform/Platform.h"
 
 namespace Scal
 {
@@ -36,6 +36,7 @@ bool AppInitialize(ApplicationGame* gameInstance)
 	AppState.GameInstance = gameInstance;
 
 	InitializeLogging();
+	Input::InitializeInput();
 
 	SINFO("Logging %s values, %d", "a", 123);
 	SFATAL("FATAL %f ERROR", 0.00525f);
@@ -45,7 +46,6 @@ bool AppInitialize(ApplicationGame* gameInstance)
 	SWARN("Warn %.000f", 12395.123914);
 
 	AppState.IsRunning = true;
-	AppState.IsSuspended = false;
 
 	if (!Platform::Startup(
 		gameInstance->Config.Name,
@@ -75,7 +75,6 @@ bool AppRun()
 
 		if (!AppState.IsSuspended)
 		{
-			Input::InputUpdate(dt);
 
 			if (!AppState.GameInstance->Update(AppState.GameInstance, 0.0f))
 			{
@@ -85,15 +84,18 @@ bool AppRun()
 
 			auto windowBuffer = Platform::GetWindowBuffer();
 			if (!AppState.GameInstance->Render(AppState.GameInstance,
-				&windowBuffer, x++ , y++, 0.0f))
+				&windowBuffer, x++, y++, 0.0f))
 			{
 				SFATAL("GameInstance Render failed. Exiting...");
 				break;
 			}
+
 			Platform::TestRender();
 		}
+
+		Input::UpdateInput();
 	}
-	
+
 	return true;
 }
 

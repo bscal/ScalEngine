@@ -3,6 +3,9 @@
 #include <Core/EntryPoint.h>
 #include <Core/SMemory.h>
 #include "Core/Structures/SArray.h"
+#include "Core/Input.h"
+
+using namespace Scal::Input;
 
 bool GameInitialize(Scal::ApplicationGame* gameInstance)
 {
@@ -12,6 +15,36 @@ bool GameInitialize(Scal::ApplicationGame* gameInstance)
 
 bool GameUpdate(Scal::ApplicationGame* gameInstance, float dt)
 {
+	if (IsKeyPressed(Keys::KEY_W))
+	{
+		SINFO("W Pressed!");
+	}
+
+	if (IsKeyHeld(Keys::KEY_A))
+	{
+		SINFO("A Held!");
+	}
+
+	if (IsKeyReleased(Keys::KEY_D))
+	{
+		SINFO("D Released!");
+	}
+
+	if (IsKeyDown(Keys::KEY_S))
+	{
+		SINFO("S DOWN!");
+	}
+
+	if (IsMouseDown(Buttons::ButtonRight))
+	{
+		SINFO("Right Mouse Is Down!");
+	}
+
+	if (WasMouseDown(Buttons::ButtonLeft))
+	{
+		SINFO("Left Mouse Was Down!");
+	}
+
 	return true;
 }
 

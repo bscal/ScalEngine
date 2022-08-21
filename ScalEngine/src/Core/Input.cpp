@@ -8,15 +8,40 @@ namespace Scal
 namespace Input
 {
 
+struct KeyState
+{
+	uint8_t State;
+
+	bool IsDown() const
+	{
+		return State >> 0 & 1;
+	}
+
+	bool IsPressed() const
+	{
+		return State >> 1 & 1;
+	}
+
+	bool IsHeld() const
+	{
+		return State >> 2 & 1;
+	}
+
+	bool IsReleased() const
+	{
+		return State >> 3 & 1;
+	}
+};
+
 struct KeyboardState
 {
-	bool Keys[(int)Keys::MaxKeys];
+	KeyState Keys[(int)Keys::MaxKeys];
 };
 
 struct MouseState
 {
 	MousePos Pos;
-	int MouseDelta;
+	int MouseDelta; // Value between -1 and 1; 0 is Unchanged; 
 	bool Buttons[(int)Buttons::MaxButtons];
 };
 
@@ -32,12 +57,11 @@ struct InputState
 global_var bool Initialized;
 global_var InputState State;
 
-void InputInitialize()
+int InitializeInput()
 {
-
-
 	Initialized = true;
 	SINFO("Successfully initialized Input!");
+	return 0;
 }
 
 void InputShutdown()
@@ -46,24 +70,28 @@ void InputShutdown()
 }
 
 
-void InputUpdate(float dt)
+void InputUpdate()
 {
-	if (!Initialized) return;
-
 	State.KeyboardPrev = State.KeyboardCur;
 	State.MousePrev = State.MouseCur;
+	SZero(&State.KeyboardCur, sizeof(KeyboardState));
+	SZero(&State.MouseCur, sizeof(MouseState));
 }
 
-void ProcessKey(Keys key, bool pressed)
+void ProcessKey(Keys key, bool isDown, bool pressed, bool held, bool released)
 {
-	State.KeyboardCur.Keys[(int)key] = pressed;
+	uint8_t keyState = 0;
+	keyState |= isDown << 0;
+	keyState |= pressed << 1;
+	keyState |= held << 2;
+	keyState |= released << 3;
+	State.KeyboardCur.Keys[(int)key].State = keyState;
 }
 
 void ProcessMouse(Buttons button, bool pressed)
 {
 	State.MouseCur.Buttons[(int)button] = pressed;
 }
-
 
 void ProcessMouseMove(int x, int y)
 {
@@ -79,25 +107,43 @@ void ProcessMouseWheel(int delta)
 SAPI bool IsKeyDown(Keys key)
 {
 	if (!Initialized) return false;
-	return State.KeyboardCur.Keys[(int)key];
+	return State.KeyboardCur.Keys[(int)key].IsDown();
 }
 
 SAPI bool IsKeyUp(Keys key)
 {
 	if (!Initialized) return true;
-	return !State.KeyboardCur.Keys[(int)key];
+	return !State.KeyboardCur.Keys[(int)key].IsDown();
 }
 
 SAPI bool WasKeyDown(Keys key)
 {
 	if (!Initialized) return false;
-	return State.KeyboardPrev.Keys[(int)key];
+	return State.KeyboardPrev.Keys[(int)key].IsDown();
 }
 
 SAPI bool WasKeyUp(Keys key)
 {
 	if (!Initialized) return true;
-	return !State.KeyboardPrev.Keys[(int)key];
+	return !State.KeyboardPrev.Keys[(int)key].IsDown();
+}
+
+SAPI bool IsKeyPressed(Keys key)
+{
+	if (!Initialized) return false;
+	return State.KeyboardCur.Keys[(int)key].IsPressed();
+}
+
+SAPI bool IsKeyHeld(Keys key)
+{
+	if (!Initialized) return false;
+	return State.KeyboardCur.Keys[(int)key].IsHeld();
+}
+
+SAPI bool IsKeyReleased(Keys key)
+{
+	if (!Initialized) return false;
+	return State.KeyboardCur.Keys[(int)key].IsReleased();
 }
 
 SAPI bool IsMouseDown(Buttons key)

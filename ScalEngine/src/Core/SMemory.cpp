@@ -1,9 +1,9 @@
 #include "SMemory.h"
 
-#include <string>
+#include "Core/Logger.h"
+#include "Core/Platform/Platform.h"
 
-#include "Logger.h"
-#include "Platform/Platform.h"
+#include <string>
 
 namespace Scal
 {

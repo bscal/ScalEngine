@@ -10,21 +10,28 @@ namespace Input
 enum class Buttons;
 enum class Keys;
 
-void InputInitialize();
-void InputShutdown();
-void InputUpdate(float dt);
+int InitializeInput();
+void ShutdownInput();
+void UpdateInput();
 
 SAPI bool IsKeyDown(Keys key);
 SAPI bool IsKeyUp(Keys key);
 SAPI bool WasKeyDown(Keys key);
 SAPI bool WasKeyUp(Keys key);
+SAPI bool IsKeyPressed(Keys key);
+SAPI bool IsKeyHeld(Keys key);
+SAPI bool IsKeyReleased(Keys key);
 
-void ProcessKey(Keys key, bool pressed);
+void ProcessKey(Keys key, bool isDown, bool pressed,
+    bool held, bool released);
 
-SAPI bool IsMouseDown(Buttons key);
-SAPI bool IsMouseUp(Buttons key);
-SAPI bool WasMouseDown(Buttons key);
-SAPI bool WasMouseUp(Buttons key);
+// NOTE For Windows atleast: double click is a seperate 
+// event so it doesnt respond to those.
+// Also doesnt support mouse hold
+SAPI bool IsMouseDown(Buttons button);
+SAPI bool IsMouseUp(Buttons button);
+SAPI bool WasMouseDown(Buttons button);
+SAPI bool WasMouseUp(Buttons button);
 
 SAPI int GetMouseWheelDelta();
 

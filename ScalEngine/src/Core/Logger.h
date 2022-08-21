@@ -4,21 +4,19 @@
 
 namespace Scal
 {
-	enum class LogLevel : uint8_t
-	{
-		Fatal = 0,
-		Error,
-		Warn,
-		Info,
-		Debug,
-		Trace
-	};
+enum class LogLevel : uint8_t
+{
+	Fatal = 0,
+	Error,
+	Warn,
+	Info,
+	Debug,
+	Trace
+};
 
-	int InitializeLogging();
+int InitializeLogging();
 
-	void ShutdownLogging();
-
-	SAPI void Log(LogLevel level, const char* msg, ...);
+SAPI void Log(LogLevel level, const char* msg, ...);
 
 
 #define LOG_WARN 1
