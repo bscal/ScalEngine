@@ -2,6 +2,7 @@
 
 #include "Core/Logger.h"
 #include "Core/SAssert.h"
+#include "Core/Audio.h"
 #include "Core/Input.h"
 #include "Core/Platform/Platform.h"
 
@@ -37,6 +38,7 @@ bool AppInitialize(ApplicationGame* gameInstance)
 
 	InitializeLogging();
 	Input::InitializeInput();
+	InitializeAudio();
 
 	SINFO("Logging %s values, %d", "a", 123);
 	SFATAL("FATAL %f ERROR", 0.00525f);
@@ -102,6 +104,8 @@ bool AppRun()
 void AppStop()
 {
 	AppState.IsRunning = false;
+
+	ShutdownAudio();
 }
 
 constexpr const char* ApplicationCmdLineArgs::operator[](int index) const

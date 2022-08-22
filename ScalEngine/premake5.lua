@@ -20,7 +20,8 @@ project "ScalEngine"
 
     includedirs
     {
-        "src"
+        "src",
+        "vendor"
     }
 
     links

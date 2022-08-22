@@ -64,13 +64,13 @@ int InitializeInput()
 	return 0;
 }
 
-void InputShutdown()
+void ShutdownInput()
 {
 	Initialized = false;
 }
 
 
-void InputUpdate()
+void UpdateInput()
 {
 	State.KeyboardPrev = State.KeyboardCur;
 	State.MousePrev = State.MouseCur;
