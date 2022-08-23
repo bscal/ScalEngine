@@ -2,8 +2,9 @@
 
 #include <Core/EntryPoint.h>
 #include <Core/SMemory.h>
-#include "Core/Structures/SArray.h"
-#include "Core/Input.h"
+#include <Core/Structures/SArray.h>
+#include <Core/Input.h>
+#include <Core/Audio.h>
 
 using namespace Scal::Input;
 
@@ -33,6 +34,11 @@ bool GameUpdate(Scal::ApplicationGame* gameInstance, float dt)
 	if (IsKeyDown(Keys::KEY_S))
 	{
 		SINFO("S DOWN!");
+	}
+
+	if (IsKeyPressed(Keys::KEY_SPACE))
+	{
+		Scal::SoundPlayFromFile("assets/Audio/VSM.mp3");
 	}
 
 	if (IsMouseDown(Buttons::ButtonRight))
