@@ -10,7 +10,7 @@ namespace Scal
 		int Count;
 		char** Args;
 
-		constexpr const char* operator[](int index) const;
+		const char* operator[](int index) const;
 	};
 
 	struct ApplicationConfig
@@ -36,11 +36,13 @@ namespace Scal
 	{
 		ApplicationConfig Config;
 		bool (*Initialize)(struct ApplicationGame* gameInstance);
-		bool (*Update)(struct ApplicationGame* gameInstance, float deltaTime);
-		bool (*Render)(struct ApplicationGame* gameInstance,
-			struct ApplicationWindowBuffer* windowBuffer, int xOffset, int yOffset, float dt);
+		bool (*Update)(struct ApplicationGame* gameInstance,
+			struct ApplicationWindowBuffer* windowBuffer,
+			float dt);
 		void (*OnResize)(struct ApplicationGame* gameInstance, uint32_t newWidth, uint32_t newHeight);
 		void* State; // GameState, this is managed by the game
+
+		int AudioHertz;
 	};
 
 	SAPI bool AppInitialize(ApplicationGame* gameInstance);

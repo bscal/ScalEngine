@@ -12,9 +12,6 @@ namespace Scal
 struct ApplicationState
 {
 	ApplicationGame* GameInstance;
-	uint64_t LastTime;
-	uint16_t Width;
-	uint16_t Height;
 	bool IsRunning;
 	bool IsSuspended;
 };
@@ -29,7 +26,7 @@ bool AppInitialize(ApplicationGame* gameInstance)
 		SERROR("App is already initialized!");
 		return false;
 	}
-	if (!gameInstance->Initialize || !gameInstance->Update || !gameInstance->Render || !gameInstance->OnResize)
+	if (!gameInstance->Initialize || !gameInstance->Update || !gameInstance->OnResize)
 	{
 		SERROR("Game Instance function pointers are not all set!");
 		return false;
@@ -38,7 +35,7 @@ bool AppInitialize(ApplicationGame* gameInstance)
 
 	InitializeLogging();
 	Input::InitializeInput();
-	InitializeAudio();
+	InitializeAudio(gameInstance);
 
 	SINFO("Logging %s values, %d", "a", 123);
 	SFATAL("FATAL %f ERROR", 0.00525f);
@@ -68,27 +65,16 @@ bool AppInitialize(ApplicationGame* gameInstance)
 bool AppRun()
 {
 	float dt = 0.0f;
-	int x = 0;
-	int y = 0;
-
 	while (AppState.IsRunning)
 	{
 		Platform::ProcessMessages();
 
 		if (!AppState.IsSuspended)
 		{
-
-			if (!AppState.GameInstance->Update(AppState.GameInstance, 0.0f))
+			auto windowBuffer = Platform::GetWindowBuffer();
+			if (!AppState.GameInstance->Update(AppState.GameInstance, &windowBuffer, 0.0f))
 			{
 				SFATAL("GameInstance Update failed. Exiting...");
-				break;
-			}
-
-			auto windowBuffer = Platform::GetWindowBuffer();
-			if (!AppState.GameInstance->Render(AppState.GameInstance,
-				&windowBuffer, x++, y++, 0.0f))
-			{
-				SFATAL("GameInstance Render failed. Exiting...");
 				break;
 			}
 
@@ -108,7 +94,7 @@ void AppStop()
 	ShutdownAudio();
 }
 
-constexpr const char* ApplicationCmdLineArgs::operator[](int index) const
+const char* ApplicationCmdLineArgs::operator[](int index) const
 {
 	SASSERT(index < Count);
 	return Args[index];

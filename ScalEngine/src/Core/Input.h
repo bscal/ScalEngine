@@ -15,9 +15,7 @@ void ShutdownInput();
 void UpdateInput();
 
 SAPI bool IsKeyDown(Keys key);
-SAPI bool IsKeyUp(Keys key);
 SAPI bool WasKeyDown(Keys key);
-SAPI bool WasKeyUp(Keys key);
 SAPI bool IsKeyPressed(Keys key);
 SAPI bool IsKeyHeld(Keys key);
 SAPI bool IsKeyReleased(Keys key);
@@ -29,9 +27,7 @@ void ProcessKey(Keys key, bool isDown, bool pressed,
 // event so it doesnt respond to those.
 // Also doesnt support mouse hold
 SAPI bool IsMouseDown(Buttons button);
-SAPI bool IsMouseUp(Buttons button);
 SAPI bool WasMouseDown(Buttons button);
-SAPI bool WasMouseUp(Buttons button);
 
 SAPI int GetMouseWheelDelta();
 

@@ -8,32 +8,39 @@
 
 using namespace Scal::Input;
 
+global_var GameState State;
+
 bool GameInitialize(Scal::ApplicationGame* gameInstance)
 {
 	SINFO("GameInitialized!");
 	return true;
 }
 
-bool GameUpdate(Scal::ApplicationGame* gameInstance, float dt)
+bool GameUpdate(Scal::ApplicationGame* gameInstance,
+	Scal::ApplicationWindowBuffer* windowBuffer,
+	float dt)
 {
 	if (IsKeyPressed(Keys::KEY_W))
 	{
 		SINFO("W Pressed!");
 	}
 
-	if (IsKeyHeld(Keys::KEY_A))
+	if (IsKeyDown(Keys::KEY_A))
 	{
-		SINFO("A Held!");
+		SINFO("A Down!");
+		--gameInstance->AudioHertz;
 	}
 
-	if (IsKeyReleased(Keys::KEY_D))
+	if (IsKeyDown(Keys::KEY_D))
 	{
-		SINFO("D Released!");
+		SINFO("D Down!");
+		++gameInstance->AudioHertz;
 	}
 
-	if (IsKeyDown(Keys::KEY_S))
+	if (IsKeyReleased(Keys::KEY_S))
 	{
-		SINFO("S DOWN!");
+		SINFO("S Released!");
+
 	}
 
 	if (IsKeyPressed(Keys::KEY_SPACE))
@@ -51,20 +58,17 @@ bool GameUpdate(Scal::ApplicationGame* gameInstance, float dt)
 		SINFO("Left Mouse Was Down!");
 	}
 
-	return true;
-}
+	State.XOffset++;
+	State.YOffset++;
 
-bool GameRender(Scal::ApplicationGame* gameInstance,
-	Scal::ApplicationWindowBuffer* windowBuffer, int xOffset, int yOffset, float dt)
-{
 	uint8_t* row = (uint8_t*)windowBuffer->Memory;
 	for (int y = 0; y < windowBuffer->Height; ++y)
 	{
 		uint32_t* pixel = (uint32_t*)row;
 		for (int x = 0; x < windowBuffer->Width; ++x)
 		{
-			uint8_t r = (uint8_t)(x + xOffset);
-			uint8_t g = (uint8_t)(y + yOffset);
+			uint8_t r = (uint8_t)(x + State.XOffset);
+			uint8_t g = (uint8_t)(y + State.YOffset);
 			uint8_t b = 0;
 
 			// BB GG RR AA in memory
@@ -80,8 +84,6 @@ void GameOnResize(Scal::ApplicationGame* gameInstance, uint32_t newWidth, uint32
 {
 }
 
-global_var GameState State;
-
 Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 {
 	ApplicationGame* gameInstance = (ApplicationGame*)SAlloc(sizeof(ApplicationGame), MemoryTag::Application);
@@ -95,9 +97,9 @@ Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	};
 	gameInstance->Initialize = GameInitialize;
 	gameInstance->Update = GameUpdate;
-	gameInstance->Render = GameRender;
 	gameInstance->OnResize = GameOnResize;
 	gameInstance->State = &State;
+	gameInstance->AudioHertz = 256;
 
 	Scal::Structures::SArray* sArray = Scal::Structures::SArrayCreate(int);
 	SArrayPush(sArray, 5);

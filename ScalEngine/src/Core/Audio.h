@@ -5,7 +5,9 @@
 namespace Scal
 {
 
-void InitializeAudio();
+struct ApplicationGame;
+
+void InitializeAudio(const ApplicationGame* AppGame);
 void ShutdownAudio();
 
 SAPI void SoundPlayFromFile(const char* soundPath);

@@ -1,48 +1,54 @@
 #include "Audio.h"
 
+#include "Core/Application.h"
 #include "Core/Logger.h"
 #include "Core/SMemory.h"
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio/miniaudio.h"
 
+#define USING_LOW_LEVEL_AUDIO 1
+
 namespace Scal
 {
 
-global_var ma_engine Engine;
+#if USING_LOW_LEVEL_AUDIO
 global_var ma_context Context;
 global_var ma_device Device;
-
-// TEST
-global_var ma_waveform SinWave;
-
+#else
+global_var ma_engine Engine;
+#endif
 
 
 void DataCallback(ma_device* Device, void* Output, const void* Input, ma_uint32 FrameCount)
 {
-	//global_var int Hertz = 256;
-	//global_var int SamplesPerSecond = 48000;
-	//global_var int BytesPerSample = sizeof(float) * 2;
-	//global_var ma_uint32 WaveCounter = 0;
-	//int CounterLength = SamplesPerSecond / Hertz;
-	//int halfSquareWavePeriod = CounterLength / 2;
-	//for (ma_uint32 i = 0; i < FrameCount; ++i)
-	//{
-	//	if (WaveCounter) WaveCounter = CounterLength;
+	ApplicationGame* GameInstance = (ApplicationGame*)Device->pUserData;
 
-	//	float sineValue = ;
-	//	float value = (--WaveCounter < halfSquareWavePeriod) ? 0.01f : -0.01f;
-	//	((float*)Output)[i] = value;
-	//}
+	int Hertz = GameInstance->AudioHertz;
+	if (Hertz == 0) Hertz = 1;
+	int SamplesPerSecond = 48000;
+	int BytesPerSample = sizeof(float) * 2;
+	int WaveCounter = 0;
+	int CounterLength = SamplesPerSecond / Hertz;
+	int halfSquareWavePeriod = CounterLength / 2;
+	int channel = 0;
+	for (int i = 0; i < FrameCount; ++i)
+	{
+		if (WaveCounter < 1)
+			WaveCounter = CounterLength;
+		
+		float value = (WaveCounter-- > CounterLength / 2) ? 0.01f : -0.01f;
+		((float*)Output)[channel++] = value;
+		((float*)Output)[channel++] = value;
+	}
 
 	// In playback mode copy data to pOutput. In capture mode read data from pInput. In full-duplex mode, both
 	// pOutput and pInput will be valid and you can move data from pInput into pOutput. Never process more than
 	// frameCount frames.
-	//ma_waveform* sinWave = (ma_waveform*)Device->pUserData;
-	//ma_waveform_read_pcm_frames(sinWave, Output, FrameCount, 0);
 }
 
-void InitializeAudioDevice()
+#if USING_LOW_LEVEL_AUDIO
+void InitializeAudioDevice(const ApplicationGame* gameInstance)
 {
 	if (ma_context_init(NULL, 0, NULL, &Context) != MA_SUCCESS)
 	{
@@ -67,18 +73,13 @@ void InitializeAudioDevice()
 		SINFO("%d - %s", iDevice, pPlaybackInfos[iDevice].name);
 	}
 
-	ma_waveform_config sinWaveConfig = ma_waveform_config_init(
-		ma_format_f32, 2, 48000, ma_waveform_type_sine, .2, 220);
-	ma_waveform_init(&sinWaveConfig, &SinWave);
-
 	ma_device_config config = ma_device_config_init(ma_device_type_playback);
-	//config.playback.pDeviceID = 0;
 	config.deviceType = ma_device_type_playback;
 	config.playback.format = ma_format_f32;
 	config.playback.channels = 2;
 	config.sampleRate = 48000;
 	config.dataCallback = DataCallback;
-	config.pUserData = &SinWave;
+	config.pUserData = (void*)gameInstance;
 
 	if (ma_device_init(&Context, &config, &Device) != MA_SUCCESS)
 	{
@@ -92,29 +93,40 @@ void InitializeAudioDevice()
 		return;
 	}
 }
+#endif
 
-void InitializeAudio()
+void InitializeAudio(const ApplicationGame* gameInstance)
 {
-	ma_result result = ma_engine_init(0, &Engine);
-	if (result != MA_SUCCESS)
+	#if USING_LOW_LEVEL_AUDIO
+	InitializeAudioDevice(gameInstance);
+	#else
+	if (ma_engine_init(0, &Engine) != MA_SUCCESS)
 	{
 		SERROR("MiniAudio result was unsuccessful");
 		return;
 	}
 	SINFO("Audio successfully initialized!");
+
 	ma_engine_set_volume(&Engine, 0.02f);
+	#endif
 }
 
- SAPI void SoundPlayFromFile(const char* soundPath)
+SAPI void SoundPlayFromFile(const char* soundPath)
 {
+	#if !USING_LOW_LEVEL_AUDIO
 	ma_engine_play_sound(&Engine, soundPath, 0);
+	#endif
 }
 
 void ShutdownAudio()
 {
+
+	#if USING_LOW_LEVEL_AUDIO
+	ma_device_uninit(&Device);
+	ma_context_uninit(&Context);
+	#else
 	ma_engine_uninit(&Engine);
-	//ma_device_uninit(&Device);
-	//ma_context_uninit(&Context);
+	#endif
 }
 
 }
