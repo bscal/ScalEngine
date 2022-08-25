@@ -1,27 +1,27 @@
 #pragma once
 
 #include "Core.h"
-#include <Windows.h>
 
 namespace Scal
 {
 	struct Timer
 	{
-		LARGE_INTEGER Frequency;
-		LARGE_INTEGER StartCounter;
-		uint64_t StartCycleCount;
+		int64_t StartCounter;
+		int64_t StartCycleCount;
+		const char* Name;
 
-		SAPI Timer();
+		SAPI Timer(const char* name);
 		SAPI ~Timer();
 	};
 
 	struct PersistentTimer
 	{
-		LARGE_INTEGER Frequency;
-		LARGE_INTEGER LastCounter;
+		uint64_t Frequency;
+		uint64_t LastCounter;
 		uint64_t LastCycleCount;
 
 		SAPI PersistentTimer();
+		SAPI void Start();
 		SAPI void Stop();
 	};
 

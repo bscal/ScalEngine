@@ -15,3 +15,7 @@
 #else
 	#define SAPI
 #endif // SCAL_PLATFORM_WINDOWS
+
+#define Kilobytes(n) (n * 1024)
+#define Megabytes(n) (Kilobytes(n) * 1024)
+#define Gigabytes(n) (Megabytes(n) * 1024)

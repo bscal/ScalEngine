@@ -19,7 +19,9 @@ bool Startup(const char* applicationName, int x, int y, int height, int width);
 
 void ProcessMessages();
 
-void TestRender();
+// TODO this is just to test draw
+// with no gpu acceleration
+void PlatformDrawToWindow();
 
 ApplicationWindowBuffer GetWindowBuffer();
 
@@ -33,7 +35,10 @@ void* SetMem(void* dest, int value, uint64_t size);
 void ConsoleWrite(const char* message, uint8_t color);
 void ConsoleWriteError(const char* message, uint8_t color);
 
-uint64_t GetPlatformTime();
+int64_t GetPlatformPerformanceTime();
+int64_t GetPlatformPerformanceFrequency();
+uint64_t GetPlatformCycleCount();
+uint64_t GetPlatformSystemTimeInMS();
 
 void PlatformSleep(uint32_t ms);
 

@@ -1,47 +1,53 @@
 #include "Timing.h"
 
-#include "Logger.h"
+#include "Core/Platform/Platform.h"
+#include "Core/Logger.h"
 
 namespace Scal
 {
-	Timer::Timer()
+	Timer::Timer(const char* name)
 	{
-		QueryPerformanceFrequency(&Frequency);
-		QueryPerformanceCounter(&StartCounter);
-		StartCycleCount = __rdtsc();
+		Name = name;
+		StartCounter = Platform::GetPlatformPerformanceTime();
+		StartCycleCount = Platform::GetPlatformCycleCount();
 	}
 
 	Timer::~Timer()
 	{
-		LARGE_INTEGER endCounter;
-		QueryPerformanceCounter(&endCounter);
-		uint64_t endCycleCount = __rdtsc();
+		auto endCounter = Platform::GetPlatformPerformanceTime();
+		auto endCycleCount = Platform::GetPlatformCycleCount();
 
-		int64_t elapsed = endCounter.QuadPart - StartCounter.QuadPart;
-		double elapsedMS = (1000.0f * (double)elapsed) / (double)Frequency.QuadPart;
+		auto frequency = Platform::GetPlatformPerformanceFrequency();
+		int64_t elapsed = endCounter - StartCounter;
+		double elapsedMS = (1000.0f * (double)elapsed) / (double)frequency;
 
 		uint64_t elapsedCycles = endCycleCount - StartCycleCount;
 		double megaCycles = (double)elapsedCycles / (1000.0f * 1000.0f);
-		SDEBUG("Elasped time: %.03fms/f, %.03fMc/f", elapsedMS, megaCycles);
+		SDEBUG("[ %s ] Elasped time: %.03fms/f, %.03fMc/f", Name, elapsedMS, megaCycles);
 	}
 
 	PersistentTimer::PersistentTimer()
 	{
-		QueryPerformanceFrequency(&Frequency);
-		QueryPerformanceCounter(&LastCounter);
-		LastCycleCount = __rdtsc();
+		Frequency = Platform::GetPlatformPerformanceFrequency();
+		LastCounter = 0;
+		LastCycleCount = 0;
+	}
+
+	void PersistentTimer::Start()
+	{
+		LastCounter = Platform::GetPlatformPerformanceTime();
+		LastCycleCount = Platform::GetPlatformCycleCount();
 	}
 
 	void PersistentTimer::Stop()
 	{
-		LARGE_INTEGER endCounter;
-		QueryPerformanceCounter(&endCounter);
-		uint64_t endCycleCount = __rdtsc();
+		auto endCounter = Platform::GetPlatformPerformanceTime();
+		auto endCycleCount = Platform::GetPlatformCycleCount();
 
-		int64_t elapsed = endCounter.QuadPart - LastCounter.QuadPart;
-		double elapsedMS = (1000.0f * (double)elapsed) / (double)Frequency.QuadPart;
+		int64_t elapsed = endCounter - LastCounter;
+		double elapsedMS = (1000.0f * (double)elapsed) / (double)Frequency;
 		
-		double FPS = (double)Frequency.QuadPart / (double)elapsed; 
+		double FPS = (double)Frequency / (double)elapsed; 
 
 		uint64_t elapsedCycles = endCycleCount - LastCycleCount;
 		double megaCycles = (double)elapsedCycles / (1000.0f * 1000.0f);

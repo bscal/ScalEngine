@@ -10,10 +10,10 @@ struct GameState
 	float DeltaTime;
 };
 
-bool GameInitialize(Scal::ApplicationGame* gameInstance);
+bool GameInitialize(Scal::ApplicationState* gameInstance);
 
-bool GameUpdate(Scal::ApplicationGame* gameInstance,
+bool GameUpdate(Scal::ApplicationState* gameInstance,
 	Scal::ApplicationWindowBuffer* windowBuffer,
 	float dt);
 
-void GameOnResize(Scal::ApplicationGame* gameInstance, uint32_t newWidth, uint32_t newHeight);
+void GameOnResize(Scal::ApplicationState* gameInstance, uint32_t newWidth, uint32_t newHeight);

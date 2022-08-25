@@ -22,7 +22,7 @@ global_var ma_engine Engine;
 
 void DataCallback(ma_device* Device, void* Output, const void* Input, ma_uint32 FrameCount)
 {
-	ApplicationGame* GameInstance = (ApplicationGame*)Device->pUserData;
+	ApplicationState* GameInstance = (ApplicationState*)Device->pUserData;
 
 	int Hertz = GameInstance->AudioHertz;
 	if (Hertz == 0) Hertz = 1;
@@ -48,7 +48,7 @@ void DataCallback(ma_device* Device, void* Output, const void* Input, ma_uint32 
 }
 
 #if USING_LOW_LEVEL_AUDIO
-void InitializeAudioDevice(const ApplicationGame* gameInstance)
+void InitializeAudioDevice(const ApplicationState* gameInstance)
 {
 	if (ma_context_init(NULL, 0, NULL, &Context) != MA_SUCCESS)
 	{
@@ -95,7 +95,7 @@ void InitializeAudioDevice(const ApplicationGame* gameInstance)
 }
 #endif
 
-void InitializeAudio(const ApplicationGame* gameInstance)
+void InitializeAudio(const ApplicationState* gameInstance)
 {
 	#if USING_LOW_LEVEL_AUDIO
 	InitializeAudioDevice(gameInstance);

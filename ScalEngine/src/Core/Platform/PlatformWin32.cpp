@@ -35,7 +35,6 @@ struct WindowBuffer
 global_var PlatformState State;
 global_var WindowBuffer MainBackBuffer;
 global_var LARGE_INTEGER Frequency;
-global_var LARGE_INTEGER StartTime;
 
 internal void Win32InitializeWindowBuffer(WindowBuffer* buffer, int width, int height)
 {
@@ -100,7 +99,6 @@ bool Startup(const char* applicationName, int x, int y, int width, int height)
 	Win32InitializeWindowBuffer(&MainBackBuffer, width, height);
 
 	QueryPerformanceFrequency(&Frequency);
-	QueryPerformanceCounter(&StartTime);
 
 	return true;
 }
@@ -178,11 +176,28 @@ void ConsoleWriteError(const char* message, uint8_t color)
 	WriteConsoleA(consoleHandle, message, (DWORD)length, 0, 0);
 }
 
-uint64_t GetPlatformTime()
+int64_t GetPlatformPerformanceTime()
 {
 	LARGE_INTEGER now;
 	QueryPerformanceCounter(&now);
 	return now.QuadPart;
+}
+
+int64_t GetPlatformPerformanceFrequency()
+{
+	return Frequency.QuadPart;
+}
+
+uint64_t GetPlatformCycleCount()
+{
+	return __rdtsc();
+}
+
+uint64_t GetPlatformSystemTimeInMS()
+{
+	LPSYSTEMTIME sysTime;
+	GetSystemTime(sysTime);
+	return sysTime->wMilliseconds;
 }
 
 void PlatformSleep(uint32_t ms)
@@ -214,8 +229,8 @@ internal void DrawToWindow(WindowBuffer* buffer, HDC deviceCtx, int windowWidth,
 		SRCCOPY);
 }
 
-// TODO just for testing
-void TestRender()
+// TODO remove
+void PlatformDrawToWindow()
 {
 	auto deviceCtx = GetDC(State.InternalState->Window);
 	auto windowDimension = GetWindowDimension(State.InternalState->Window);

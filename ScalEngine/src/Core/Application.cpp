@@ -4,26 +4,25 @@
 #include "Core/SAssert.h"
 #include "Core/Audio.h"
 #include "Core/Input.h"
+#include "Core/Timing.h"
+#include "Core/SMemory.h"
 #include "Core/Platform/Platform.h"
 
 namespace Scal
 {
 
-struct ApplicationState
-{
-	ApplicationGame* GameInstance;
-	bool IsRunning;
-	bool IsSuspended;
-};
-
-global_var bool IsInitialized;
 global_var ApplicationState AppState;
 
-bool AppInitialize(ApplicationGame* gameInstance)
+bool AppInitialize(Game* gameInstance)
 {
-	if (IsInitialized)
+	if (AppState.IsInitialized)
 	{
 		SERROR("App is already initialized!");
+		return false;
+	}
+	if (!gameInstance)
+	{
+		SERROR("Game Instance cannot be a nullptr!");
 		return false;
 	}
 	if (!gameInstance->Initialize || !gameInstance->Update || !gameInstance->OnResize)
@@ -31,20 +30,21 @@ bool AppInitialize(ApplicationGame* gameInstance)
 		SERROR("Game Instance function pointers are not all set!");
 		return false;
 	}
-	AppState.GameInstance = gameInstance;
+	
+	//AppState = (ApplicationState*)SAlloc(sizeof(ApplicationState), MemoryTag::Application);
+	//SZero(AppState, sizeof(ApplicationState));
+
+	AppState.Game = gameInstance;
 
 	InitializeLogging();
 	Input::InitializeInput();
-	InitializeAudio(gameInstance);
+	InitializeAudio(&AppState);
 
-	SINFO("Logging %s values, %d", "a", 123);
-	SFATAL("FATAL %f ERROR", 0.00525f);
-	STRACE("HELLO %i", 1234109123);
-	SERROR("%i %f %s", 99, 15.28, "This");
-	SDEBUG("DEBUGING");
-	SWARN("Warn %.000f", 12395.123914);
-
-	AppState.IsRunning = true;
+	AppState.GameMemory = {};
+	AppState.GameMemory.PermenantSize = Megabytes(16);
+	AppState.GameMemory.PermenantStoragePtr = SAlloc(
+		AppState.GameMemory.PermenantSize,
+		MemoryTag::Application);
 
 	if (!Platform::Startup(
 		gameInstance->Config.Name,
@@ -57,9 +57,13 @@ bool AppInitialize(ApplicationGame* gameInstance)
 		return false;
 	}
 
-	gameInstance->Initialize(gameInstance);
+	AppState.IsRunning = true;
+	AppState.IsSuspended = false;
+	AppState.IsInitialized = gameInstance->Initialize(&AppState);
 
-	return IsInitialized = true;
+	SINFO("Application Initialized: %b", AppState.IsInitialized);
+	SINFO(Scal::GetMemoryUsage().c_str());
+	return AppState.IsInitialized;
 }
 
 bool AppRun()
@@ -67,18 +71,18 @@ bool AppRun()
 	float dt = 0.0f;
 	while (AppState.IsRunning)
 	{
+		Timer timer("RunLoop");
 		Platform::ProcessMessages();
 
 		if (!AppState.IsSuspended)
 		{
 			auto windowBuffer = Platform::GetWindowBuffer();
-			if (!AppState.GameInstance->Update(AppState.GameInstance, &windowBuffer, 0.0f))
+			if (!AppState.Game->Update(&AppState, &windowBuffer, 0.0f))
 			{
 				SFATAL("GameInstance Update failed. Exiting...");
 				break;
 			}
-
-			Platform::TestRender();
+			Platform::PlatformDrawToWindow();
 		}
 
 		Input::UpdateInput();
@@ -90,7 +94,6 @@ bool AppRun()
 void AppStop()
 {
 	AppState.IsRunning = false;
-
 	ShutdownAudio();
 }
 

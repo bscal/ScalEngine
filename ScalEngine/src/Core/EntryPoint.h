@@ -4,13 +4,13 @@
 #include "Logger.h"
 #include "SMemory.h"
 
-extern Scal::ApplicationGame* Scal::CreateApplication(Scal::ApplicationCmdLineArgs args);
+extern Scal::Game* Scal::CreateApplication(Scal::ApplicationCmdLineArgs args);
 
 int main(int argc, char** argv)
 {
 	Scal::InitializeMemory();
 
-	auto gameInstancePtr = Scal::CreateApplication({ argc, argv });
+	Scal::Game* gameInstancePtr = Scal::CreateApplication({ argc, argv });
 
 	if (!Scal::AppInitialize(gameInstancePtr))
 	{

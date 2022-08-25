@@ -10,13 +10,14 @@ using namespace Scal::Input;
 
 global_var GameState State;
 
-bool GameInitialize(Scal::ApplicationGame* gameInstance)
+bool GameInitialize(Scal::ApplicationState* gameInstance)
 {
 	SINFO("GameInitialized!");
+	gameInstance->AudioHertz = 256;
 	return true;
 }
 
-bool GameUpdate(Scal::ApplicationGame* gameInstance,
+bool GameUpdate(Scal::ApplicationState* gameInstance,
 	Scal::ApplicationWindowBuffer* windowBuffer,
 	float dt)
 {
@@ -77,16 +78,17 @@ bool GameUpdate(Scal::ApplicationGame* gameInstance,
 		}
 		row += windowBuffer->Pitch;
 	}
+
 	return true;
 }
 
-void GameOnResize(Scal::ApplicationGame* gameInstance, uint32_t newWidth, uint32_t newHeight)
+void GameOnResize(Scal::ApplicationState* gameInstance, uint32_t newWidth, uint32_t newHeight)
 {
 }
 
-Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
+Scal::Game* Scal::CreateApplication(ApplicationCmdLineArgs args)
 {
-	ApplicationGame* gameInstance = (ApplicationGame*)SAlloc(sizeof(ApplicationGame), MemoryTag::Application);
+	Game* gameInstance = (Game*)SAlloc(sizeof(Game), MemoryTag::Game);
 	gameInstance->Config =
 	{
 		"Scal Game",
@@ -99,7 +101,6 @@ Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	gameInstance->Update = GameUpdate;
 	gameInstance->OnResize = GameOnResize;
 	gameInstance->State = &State;
-	gameInstance->AudioHertz = 256;
 
 	Scal::Structures::SArray* sArray = Scal::Structures::SArrayCreate(int);
 	SArrayPush(sArray, 5);
@@ -120,7 +121,6 @@ Scal::ApplicationGame* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	SINFO("pop: %d", val);
 	
 	SINFO("length: %d, capacity: %d, stride %d, sizeof: %d", sArray->Length, sArray->Capacity, sArray->Stride, sizeof(Scal::Structures::SArray));
-	SINFO(Scal::GetMemoryUsage().c_str());
 
 	return gameInstance;
 }
