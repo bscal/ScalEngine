@@ -15,9 +15,12 @@ struct PlatformState
 	InternalPlatformState* InternalState;
 };
 
-bool Startup(const char* applicationName, int x, int y, int height, int width);
+bool Initialize();
 
-void ProcessMessages();
+bool Startup(const char* applicationName,
+	int x, int y, int height, int width);
+
+void ProcessMessages(ApplicationState* appState);
 
 // TODO this is just to test draw
 // with no gpu acceleration
@@ -26,8 +29,10 @@ void PlatformDrawToWindow();
 ApplicationWindowBuffer GetWindowBuffer();
 
 void* Allocate(uint64_t size, bool aligned);
+void* AllocatePage(int64_t size);
 void* Realloc(void* block, uint64_t newSize);
 void  Free(void* block, bool aligned);
+void  FreePage(void* block);
 void* ZeroMem(void* block, uint64_t size);
 void* CopyMem(void* dest, const void* src, uint64_t size);
 void* SetMem(void* dest, int value, uint64_t size);

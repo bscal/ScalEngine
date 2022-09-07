@@ -10,14 +10,34 @@ using namespace Scal::Input;
 
 global_var GameState State;
 
-bool GameInitialize(Scal::ApplicationState* gameInstance)
+bool GameInitialize(Scal::ApplicationState* appState)
 {
 	SINFO("GameInitialized!");
-	gameInstance->AudioHertz = 256;
+	Scal::Structures::SArray* sArray = Scal::Structures::SArrayCreate(int);
+	SArrayPush(sArray, 5);
+	SArrayPush(sArray, 255);
+	SArrayPush(sArray, -100000);
+	SArrayPush(sArray, -500 + 250);
+	SArrayPush(sArray, 65000);
+
+	int* i = (int*)Scal::Structures::ArrayPeekAt(sArray, 1);
+	SINFO("i = %d", *i);
+	++* i;
+	SINFO("i = %d", *i);
+	int* ii = (int*)Scal::Structures::ArrayPeekAt(sArray, 1);
+	SINFO("i = %d", *ii);
+
+	int val;
+	Scal::Structures::ArrayPop(sArray, &val);
+	SINFO("pop: %d", val);
+
+	SINFO("length: %d, capacity: %d, stride %d, sizeof: %d", sArray->Length, sArray->Capacity, sArray->Stride, sizeof(Scal::Structures::SArray));
+
+	appState->AudioHertz = 256;
 	return true;
 }
 
-bool GameUpdate(Scal::ApplicationState* gameInstance,
+bool GameUpdate(Scal::ApplicationState* appState,
 	Scal::ApplicationWindowBuffer* windowBuffer,
 	float dt)
 {
@@ -29,13 +49,13 @@ bool GameUpdate(Scal::ApplicationState* gameInstance,
 	if (IsKeyDown(Keys::KEY_A))
 	{
 		SINFO("A Down!");
-		--gameInstance->AudioHertz;
+		--appState->AudioHertz;
 	}
 
 	if (IsKeyDown(Keys::KEY_D))
 	{
 		SINFO("D Down!");
-		++gameInstance->AudioHertz;
+		++appState->AudioHertz;
 	}
 
 	if (IsKeyReleased(Keys::KEY_S))
@@ -86,7 +106,7 @@ void GameOnResize(Scal::ApplicationState* gameInstance, uint32_t newWidth, uint3
 {
 }
 
-Scal::Game* Scal::CreateApplication(ApplicationCmdLineArgs args)
+Scal::Game* Scal::CreateGame(ApplicationCmdLineArgs args)
 {
 	Game* gameInstance = (Game*)SAlloc(sizeof(Game), MemoryTag::Game);
 	gameInstance->Config =
@@ -101,26 +121,5 @@ Scal::Game* Scal::CreateApplication(ApplicationCmdLineArgs args)
 	gameInstance->Update = GameUpdate;
 	gameInstance->OnResize = GameOnResize;
 	gameInstance->State = &State;
-
-	Scal::Structures::SArray* sArray = Scal::Structures::SArrayCreate(int);
-	SArrayPush(sArray, 5);
-	SArrayPush(sArray, 255);
-	SArrayPush(sArray, -100000);
-	SArrayPush(sArray, -500 + 250);
-	SArrayPush(sArray, 65000);
-	
-	int* i = (int*)Scal::Structures::ArrayPeekAt(sArray, 1);
-	SINFO("i = %d", *i);
-	++* i;
-	SINFO("i = %d", *i);
-	int* ii = (int*)Scal::Structures::ArrayPeekAt(sArray, 1);
-	SINFO("i = %d", *ii);
-
-	int val;
-	Scal::Structures::ArrayPop(sArray, &val);
-	SINFO("pop: %d", val);
-	
-	SINFO("length: %d, capacity: %d, stride %d, sizeof: %d", sArray->Length, sArray->Capacity, sArray->Stride, sizeof(Scal::Structures::SArray));
-
 	return gameInstance;
 }

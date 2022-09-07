@@ -12,6 +12,8 @@
 namespace Scal
 {
 
+// TODO move to a State struct
+
 #if USING_LOW_LEVEL_AUDIO
 global_var ma_context Context;
 global_var ma_device Device;
@@ -22,9 +24,9 @@ global_var ma_engine Engine;
 
 void DataCallback(ma_device* Device, void* Output, const void* Input, ma_uint32 FrameCount)
 {
-	ApplicationState* GameInstance = (ApplicationState*)Device->pUserData;
+	ApplicationState* appState = (ApplicationState*)Device->pUserData;
 
-	int Hertz = GameInstance->AudioHertz;
+	int Hertz = appState->AudioHertz;
 	if (Hertz == 0) Hertz = 1;
 	int SamplesPerSecond = 48000;
 	int BytesPerSample = sizeof(float) * 2;
@@ -41,10 +43,6 @@ void DataCallback(ma_device* Device, void* Output, const void* Input, ma_uint32 
 		((float*)Output)[channel++] = value;
 		((float*)Output)[channel++] = value;
 	}
-
-	// In playback mode copy data to pOutput. In capture mode read data from pInput. In full-duplex mode, both
-	// pOutput and pInput will be valid and you can move data from pInput into pOutput. Never process more than
-	// frameCount frames.
 }
 
 #if USING_LOW_LEVEL_AUDIO
@@ -105,10 +103,11 @@ void InitializeAudio(const ApplicationState* gameInstance)
 		SERROR("MiniAudio result was unsuccessful");
 		return;
 	}
-	SINFO("Audio successfully initialized!");
 
 	ma_engine_set_volume(&Engine, 0.02f);
 	#endif
+
+	SINFO("Audio successfully initialized!");
 }
 
 SAPI void SoundPlayFromFile(const char* soundPath)

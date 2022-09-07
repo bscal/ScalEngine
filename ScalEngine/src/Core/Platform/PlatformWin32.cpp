@@ -35,12 +35,13 @@ struct WindowBuffer
 global_var PlatformState State;
 global_var WindowBuffer MainBackBuffer;
 global_var LARGE_INTEGER Frequency;
+global_var HANDLE HeapBlock;
 
 internal void Win32InitializeWindowBuffer(WindowBuffer* buffer, int width, int height)
 {
 	if (buffer->Memory)
 	{
-		VirtualFree(buffer->Memory, 0, MEM_RELEASE);
+		FreePage(buffer->Memory);
 	}
 
 	buffer->Width = width;
@@ -57,10 +58,27 @@ internal void Win32InitializeWindowBuffer(WindowBuffer* buffer, int width, int h
 
 	int size = width * height * bytesPerPixel;
 	// TODO look into replacing or moving into SMemory
-	buffer->Memory = VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
+	buffer->Memory = AllocatePage(size);
 }
 
 LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
+
+bool Initialize()
+{
+	if (HeapBlock)
+	{
+		SERROR("Heap already allocated");
+		return false;
+	}
+	HeapBlock = HeapCreate(0, 0, 0);
+	if (!HeapBlock)
+	{
+		SERROR("Failed to create a new heap with LastError %d.\n",
+			GetLastError());
+		return false;
+	}
+	return true;
+}
 
 bool Startup(const char* applicationName, int x, int y, int width, int height)
 {
@@ -103,12 +121,12 @@ bool Startup(const char* applicationName, int x, int y, int width, int height)
 	return true;
 }
 
-void ProcessMessages()
+void ProcessMessages(ApplicationState* appState)
 {
 	MSG message;
 	while (PeekMessageA(&message, 0, 0, 0, PM_REMOVE))
 	{
-		if (message.message == WM_QUIT) AppStop();
+		if (message.message == WM_QUIT) AppShutdown();
 		TranslateMessage(&message);
 		DispatchMessageA(&message);
 	}
@@ -126,17 +144,27 @@ ApplicationWindowBuffer GetWindowBuffer()
 
 void* Allocate(uint64_t size, bool aligned)
 {
-	return malloc(size);
+	return HeapAlloc(HeapBlock, HEAP_ZERO_MEMORY, size);
+	//return VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+}
+
+void* AllocatePage(int64_t size)
+{
+	return VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 }
 
 void* Realloc(void* block, uint64_t newSize)
 {
-	return realloc(block, newSize);
+	return HeapReAlloc(HeapBlock, 0, block, newSize);
 }
 
 void  Free(void* block, bool aligned)
 {
-	return free(block);
+	HeapFree(HeapBlock, 0, block);
+}
+void  FreePage(void* block)
+{
+	VirtualFree(block, 0, MEM_RELEASE);
 }
 
 void* ZeroMem(void* block, uint64_t size)
@@ -246,11 +274,11 @@ internal LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message,
 	{
 		case WM_CLOSE:
 		{
-			AppStop();
+			AppShutdown();
 		} break;
 		case WM_DESTROY:
 		{
-			AppStop();
+			AppShutdown();
 		} break;
 		case WM_SIZE:
 		{
@@ -261,7 +289,7 @@ internal LRESULT CALLBACK Win32WindowProcessMessage(HWND window, UINT message,
 		case WM_SYSKEYUP:
 		{
 			bool wasDown = (lParam & (1 << 30)) != 0;
-			bool isDown = (lParam & (1 << 31)) == 0;
+			bool isDown = (lParam & ((uint64_t)1 << 31)) == 0;
 			bool pressed = !wasDown && isDown;
 			bool held = wasDown && isDown;
 			bool released = wasDown && !isDown;

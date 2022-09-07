@@ -23,8 +23,8 @@ namespace Scal
 
 	struct GameMemory
 	{
-		uint64_t PermenantSize;
-		void* PermenantStoragePtr;
+		uint64_t Size;
+		void* Address;
 	};
 
 	// Defined by the Game
@@ -41,20 +41,14 @@ namespace Scal
 
 	struct ApplicationState
 	{
-		GameMemory GameMemory;
+		GameMemory PerminentMemory;
+		GameMemory TransientMemory;
 		Game* Game;
-
 		int AudioHertz;
 		bool IsInitialized;
 		bool IsRunning;
 		bool IsSuspended;
 	};
-
-	SAPI bool AppInitialize(Game* gameInstance);
-
-	SAPI bool AppRun();
-
-	void AppStop();
 
 	struct ApplicationCmdLineArgs
 	{
@@ -64,7 +58,13 @@ namespace Scal
 		const char* operator[](int index) const;
 	};
 
+	SAPI bool AppInitializeMemory();
+	SAPI bool AppInitialize(ApplicationCmdLineArgs args,
+		Game* gameIntance);
+	SAPI void AppRun();
+	SAPI void AppShutdown();
+
 	// defined in client
-	Game* CreateApplication(ApplicationCmdLineArgs args);
+	extern Game* CreateGame(ApplicationCmdLineArgs args);
 
 }

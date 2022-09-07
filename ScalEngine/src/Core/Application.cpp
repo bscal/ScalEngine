@@ -10,10 +10,20 @@
 
 namespace Scal
 {
-
 global_var ApplicationState AppState;
 
-bool AppInitialize(Game* gameInstance)
+SAPI bool AppInitializeMemory()
+{
+	if (!Platform::Initialize())
+	{
+		SERROR("Platform failed to initialize!");
+		return false;
+	}
+	Scal::InitializeMemory();
+	return true;
+}
+
+bool AppInitialize(ApplicationCmdLineArgs args, Game* gameInstance)
 {
 	if (AppState.IsInitialized)
 	{
@@ -30,21 +40,11 @@ bool AppInitialize(Game* gameInstance)
 		SERROR("Game Instance function pointers are not all set!");
 		return false;
 	}
-	
-	//AppState = (ApplicationState*)SAlloc(sizeof(ApplicationState), MemoryTag::Application);
-	//SZero(AppState, sizeof(ApplicationState));
-
 	AppState.Game = gameInstance;
 
 	InitializeLogging();
 	Input::InitializeInput();
 	InitializeAudio(&AppState);
-
-	AppState.GameMemory = {};
-	AppState.GameMemory.PermenantSize = Megabytes(16);
-	AppState.GameMemory.PermenantStoragePtr = SAlloc(
-		AppState.GameMemory.PermenantSize,
-		MemoryTag::Application);
 
 	if (!Platform::Startup(
 		gameInstance->Config.Name,
@@ -53,9 +53,19 @@ bool AppInitialize(Game* gameInstance)
 		gameInstance->Config.Width,
 		gameInstance->Config.Height))
 	{
-		SERROR("App failed to startup!");
+		SERROR("Platform failed to startup!");
 		return false;
 	}
+
+	AppState.PerminentMemory.Size = Megabytes(64);
+	AppState.PerminentMemory.Address = SAllocPage(
+		AppState.PerminentMemory.Size,
+		MemoryTag::Application);
+
+	AppState.TransientMemory.Size = Gigabytes((uint64_t)2);
+	AppState.TransientMemory.Address = SAllocPage(
+		AppState.TransientMemory.Size,
+		MemoryTag::Application);
 
 	AppState.IsRunning = true;
 	AppState.IsSuspended = false;
@@ -66,13 +76,13 @@ bool AppInitialize(Game* gameInstance)
 	return AppState.IsInitialized;
 }
 
-bool AppRun()
+void AppRun()
 {
 	float dt = 0.0f;
 	while (AppState.IsRunning)
 	{
-		Timer timer("RunLoop");
-		Platform::ProcessMessages();
+		//Timer timer("RunLoop");
+		Platform::ProcessMessages(&AppState);
 
 		if (!AppState.IsSuspended)
 		{
@@ -87,11 +97,9 @@ bool AppRun()
 
 		Input::UpdateInput();
 	}
-
-	return true;
 }
 
-void AppStop()
+SAPI void AppShutdown()
 {
 	AppState.IsRunning = false;
 	ShutdownAudio();

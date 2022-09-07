@@ -2,7 +2,7 @@ project "ScalGame"
     kind "ConsoleApp"
     language "C++"
     staticruntime "off"
-    cppdialect "C++20"
+    cppdialect "C++17"
 
     targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
     objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -36,6 +36,7 @@ project "ScalGame"
         symbols "on"
 
     filter "configurations:Release"
+        defines "SCAL_RELEASE"
         buildoptions "/MD"
         runtime "Release"
         optimize "on"
@@ -44,10 +45,5 @@ project "ScalGame"
         defines "SCAL_PLATFORM_WINDOWS"
         systemversion "latest"
 
-    --filter "system:Unix"
-        --defines "SCAL_PLATFORM_LINUX"
-
-    postbuildcommands
-    {
-        --("{COPY} %{cfg.buildtarget.relpath} ../bin/ .. outputdir .. /Sandbox")
-    }
+    filter "system:Unix"
+        defines "SCAL_PLATFORM_LINUX"

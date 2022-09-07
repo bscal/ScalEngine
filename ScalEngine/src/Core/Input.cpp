@@ -31,25 +31,24 @@ struct MouseState
 struct InputState
 {
 	KeyboardState KeyboardCur;
-	KeyboardState KeyboardPrev;
+	KeyboardState KeyboardPrev; // TODO are previous really needed?
 	MouseState MouseCur;
-	MouseState MousePrev;
+	MouseState MousePrev; // TODO are previous really needed?
+	bool IsInitialized;
 };
 
-
-global_var bool Initialized;
 global_var InputState State;
 
 int InitializeInput()
 {
-	Initialized = true;
+	State.IsInitialized = true;
 	SINFO("Successfully initialized Input!");
 	return 0;
 }
 
 void ShutdownInput()
 {
-	Initialized = false;
+	State.IsInitialized = false;
 }
 
 
@@ -87,61 +86,61 @@ void ProcessMouseWheel(int delta)
 
 SAPI bool IsKeyDown(Keys key)
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.KeyboardCur.Keys[(int)key].IsDown;
 }
 
 SAPI bool WasKeyDown(Keys key)
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.KeyboardPrev.Keys[(int)key].IsDown;
 }
 
 SAPI bool IsKeyPressed(Keys key)
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.KeyboardCur.Keys[(int)key].IsPressed;
 }
 
 SAPI bool IsKeyHeld(Keys key)
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.KeyboardCur.Keys[(int)key].IsHeld;
 }
 
 SAPI bool IsKeyReleased(Keys key)
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.KeyboardCur.Keys[(int)key].IsReleased;
 }
 
 SAPI bool IsMouseDown(Buttons key)
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.MouseCur.Buttons[(int)key];
 }
 
 SAPI bool WasMouseDown(Buttons key)
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.MousePrev.Buttons[(int)key];
 }
 
 SAPI int GetMouseWheelDelta()
 {
-	if (!Initialized) return false;
+	if (!State.IsInitialized) return false;
 	return State.MouseCur.MouseDelta;
 }
 
 SAPI MousePos GetMousePosition()
 {
-	if (!Initialized) return { 0, 0 };
+	if (!State.IsInitialized) return { 0, 0 };
 	return State.MouseCur.Pos;
 }
 
 SAPI MousePos GetPrevMousePosition()
 {
-	if (!Initialized) return { 0, 0 };
+	if (!State.IsInitialized) return { 0, 0 };
 	return State.MousePrev.Pos;
 }
 

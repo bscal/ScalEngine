@@ -2,7 +2,7 @@ project "ScalEngine"
     kind "SharedLib"
     language "C++"
     staticruntime "off"
-    cppdialect "C++20"
+    cppdialect "C++17"
 
     targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
     objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -44,10 +44,13 @@ project "ScalEngine"
         defines "SCAL_PLATFORM_WINDOWS"
         systemversion "latest"
 
-    --filter "system:Unix"
-        --defines "SCAL_PLATFORM_LINUX"
+    filter "system:Unix"
+        defines "SCAL_PLATFORM_LINUX"
+
+    filter {}
 
     postbuildcommands
     {
-        ("{COPYDIR} %{wks.location}/bin/" .. outputdir .. "/%{prj.name}\\ScalEngine.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}\\../ScalGame/")
+        ("{COPYFILE} %{wks.location}bin/" .. outputdir .. "/%{prj.name}/ScalEngine.dll "
+            .. "%{wks.location}bin/" .. outputdir .. "/%{prj.name}/../ScalGame/ScalEngine.dll")
     }

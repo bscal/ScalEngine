@@ -31,12 +31,13 @@ enum class MemoryTag : int
 };
 
 SAPI void InitializeMemory();
-void ShutdownMemory();
 
 SAPI void* SAlloc(uint64_t size, MemoryTag tag);
-SAPI void* SRealloc(void* address, uint64_t oldSize, uint64_t newSize, MemoryTag tag);
-SAPI void  SFree(void* address, uint64_t size, MemoryTag tag);
-SAPI void* SZero(void* address, uint64_t size);
+SAPI void* SAllocPage(uint64_t size, MemoryTag tag);
+SAPI void* SRealloc(void* block, uint64_t oldSize, uint64_t newSize, MemoryTag tag);
+SAPI void  SFree(void* block, uint64_t size, MemoryTag tag);
+SAPI void  SFree(void* block, uint64_t size, MemoryTag tag);
+SAPI void* SZero(void* block, uint64_t size);
 SAPI void* SCopy(void* dest, const void* src, uint64_t size);
 SAPI void* SSet(void* dest, int value, uint64_t size);
 

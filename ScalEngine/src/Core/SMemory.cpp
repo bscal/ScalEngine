@@ -21,10 +21,6 @@ void InitializeMemory()
 	Stats = { 0 };
 }
 
-void ShutdownMemory()
-{
-
-}
 
 void* SAlloc(uint64_t size, MemoryTag tag)
 {
@@ -39,7 +35,20 @@ void* SAlloc(uint64_t size, MemoryTag tag)
 	return Platform::Allocate(size, false);
 }
 
-void* SRealloc(void* address, uint64_t oldSize, uint64_t newSize, MemoryTag tag)
+SAPI void* SAllocPage(uint64_t size, MemoryTag tag)
+{
+	if (tag == MemoryTag::Unknown)
+	{
+		SWARN("SAlloc called with tag: MemoryTag::Unknown!");
+	}
+
+	Stats.TotalMemAllocated += size;
+	Stats.TaggedAllocations[(int)tag] += size;
+
+	return Platform::AllocatePage(size);
+}
+
+void* SRealloc(void* block, uint64_t oldSize, uint64_t newSize, MemoryTag tag)
 {
 	if (tag == MemoryTag::Unknown)
 	{
@@ -50,10 +59,10 @@ void* SRealloc(void* address, uint64_t oldSize, uint64_t newSize, MemoryTag tag)
 	Stats.TotalMemAllocated += newSize;
 	Stats.TaggedAllocations[(int)tag] -= oldSize;
 	Stats.TaggedAllocations[(int)tag] += newSize;
-	return Platform::Realloc(address, newSize);
+	return Platform::Realloc(block, newSize);
 }
 
-void SFree(void* address, uint64_t size, MemoryTag tag)
+void SFree(void* block, uint64_t size, MemoryTag tag)
 {
 	if (tag == MemoryTag::Unknown)
 	{
@@ -61,7 +70,18 @@ void SFree(void* address, uint64_t size, MemoryTag tag)
 	}
 	Stats.TotalMemAllocated -= size;
 	Stats.TaggedAllocations[(int)tag] -= size;
-	Platform::Free(address, false);
+	Platform::Free(block, false);
+}
+
+void SFreePage(void* block, uint64_t size, MemoryTag tag)
+{
+	if (tag == MemoryTag::Unknown)
+	{
+		SWARN("SAlloc called with tag: MemoryTag::Unknown!");
+	}
+	Stats.TotalMemAllocated -= size;
+	Stats.TaggedAllocations[(int)tag] -= size;
+	Platform::FreePage(block);
 }
 
 void* SZero(void* address, uint64_t size)
